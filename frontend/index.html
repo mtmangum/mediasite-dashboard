@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Instructor Dashboard · Mediasite</title>
+  </head>
+  <body>
+    <a class="skip" href="#workspace">Skip to course workspace</a>
+    <header class="topbar">
+      <img
+        src="/brand/ut-wordmark-white.svg"
+        alt="The University of Texas at Austin"
+      />
+      <div class="topbar-right">
+        <span>Mediasite</span
+        ><button id="themeToggle" class="secondary theme-toggle">
+          <span id="themeLabel">Dark mode</span>
+        </button>
+      </div>
+    </header>
+    <div class="shell">
+      <aside>
+        <div class="workspace-mark">M<span>Instructor workspace</span></div>
+        <p class="eyebrow">YOUR LIBRARY</p>
+        <label for="instructor">Instructor</label
+        ><select id="instructor"></select
+        ><label for="semester">Semester</label
+        ><select id="semester"></select>
+        <div class="nav-heading">Courses <span id="courseCount"></span></div>
+        <nav id="courses" aria-label="Courses"></nav>
+        <div class="aside-note">
+          <span class="badge" id="mode">Connecting</span>
+          <p id="modeNote">Loading your workspace…</p>
+          <p>Course groups are suggested from recording metadata.</p>
+        </div>
+      </aside>
+      <main id="workspace">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">TEACHING & LEARNING</p>
+            <h1>Course overview</h1>
+            <p class="muted">
+              A clearer view of how your lectures are watched.
+            </p>
+          </div>
+          <button id="refresh" class="secondary">↻ Refresh</button>
+        </div>
+        <div id="status" role="status" aria-live="polite">Loading library…</div>
+        <section id="overview"></section>
+        <section class="panel comparison">
+          <div class="section-heading">
+            <div>
+              <h2>Course comparison</h2>
+              <p class="muted">Your courses in the selected semester</p>
+            </div>
+            <label class="window-label" for="window"
+              >Reporting window<select id="window">
+                <option value="all">All time</option>
+                <option value="first7">First 7 days</option>
+                <option value="last30">Last 30 days</option>
+              </select></label
+            >
+          </div>
+          <div id="comparison"></div>
+        </section>
+        <section class="panel lecture-panel">
+          <div class="section-heading">
+            <div>
+              <h2>Lecture library</h2>
+              <p id="lectureCount" class="muted"></p>
+            </div>
+            <button id="export" class="secondary">Export CSV</button>
+          </div>
+          <div class="library-tools">
+            <input
+              id="search"
+              type="search"
+              aria-label="Search lectures"
+              placeholder="Search lecture titles or descriptions"
+            /><button id="retry" class="secondary" hidden>Retry reports</button>
+          </div>
+          <div id="lectures"></div>
+        </section>
+        <p class="footnote">
+          Sessions are anonymous viewing visits, not student counts or
+          attendance. Completion means at least 85% recorded coverage among
+          watched sessions with known coverage. Viewing is not proof of
+          learning.
+        </p>
+      </main>
+    </div>
+    <dialog id="detail">
+      <div class="detail-heading">
+        <div>
+          <p class="eyebrow">LECTURE REPORT · ALL TIME</p>
+          <h2 id="detailTitle"></h2>
+          <p id="detailMeta" class="muted"></p>
+        </div>
+        <button
+          id="closeDetail"
+          class="secondary"
+          aria-label="Close lecture report"
+        >
+          ✕
+        </button>
+      </div>
+      <div id="detailBody"></div>
+    </dialog>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

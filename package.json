@@ -1,0 +1,24 @@
+{
+  "name": "mediasite-instructor-dashboard",
+  "version": "0.1.0",
+  "description": "Course analytics workspace for Mediasite instructors",
+  "private": true,
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env server.js --dev",
+    "start": "node --env-file-if-exists=.env server.js",
+    "prestart": "npm run build",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.js",
+    "format": "prettier --write frontend *.js *.mjs *.json test *.md",
+    "format:check": "prettier --check frontend *.js *.mjs *.json test *.md"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.9",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3"
+  }
+}

@@ -1,0 +1,71 @@
+# Mediasite Instructor Dashboard
+
+A local, read-only course workspace for instructors. Compare lectures, inspect viewing
+patterns, and open detailed reports. Reuses the Mediasite API Tester's branding, font,
+real screenshot assets, title parser, and analytics/chart code.
+
+## Quick start
+
+Requires Node.js 22.18+ (the tests use native TypeScript type stripping).
+
+```sh
+npm ci
+npm run dev
+```
+
+Open **http://localhost:3100**. Sample data is the default: two courses, one fictional
+instructor, and 24 lectures with real illustrative screenshots. No credentials needed.
+Stop with **Ctrl+C**. Use `npm start` to build and serve production assets.
+
+## Connect to Mediasite
+
+```sh
+cp .env.example .env
+```
+
+Set `DATA_MODE=live` and fill in the API URL, key, username, and password. Restart.
+The account needs API Access and permission to read presentation analytics. Obtain a
+key at `https://YOUR-SERVER/Mediasite/Api/Docs/ApiKeyRegistration.aspx` or ask your admin.
+Credentials stay in `.env` and on the Node server. They are not copied from the original app.
+
+## Use the dashboard
+
+- Select an **instructor**, **semester**, and **course**. Lectures appear in chronological order.
+- Compare **All time**, **First 7 days**, or **Last 30 days** viewing activity.
+- Select a lecture for its full **all-time** engagement, retention, and audience charts.
+- Use **Refresh** to reload the library and reports; **Retry reports** retries unavailable analytics.
+- Search lecture titles or descriptions, or export the selected course's metrics as CSV.
+
+Course grouping uses the parsed course/section/instructor in recording titles and
+record dates for the semester (Jan–May spring, Jun–Jul summer, Aug–Dec fall). Folder,
+presenter, and owner are fallbacks. These are suggestions based on metadata, not
+verified enrollment or identity. Multiple name spellings may appear separately.
+
+Live mode follows API pagination rather than stopping at the latest 100 recordings.
+Repeated, foreign, or excessively large pagination fails explicitly rather than
+presenting an incomplete library as complete. Report failures show unavailable values,
+not zero activity. Newer lectures show when their first seven days are incomplete.
+
+Session counts are not student counts, and viewing is not evidence of learning or
+attendance. Completion means at least 85% recorded coverage among watched sessions
+with known coverage. Course totals exclude reports whose session data is unavailable.
+The comparison window applies to overview metrics; detailed charts are labeled all-time.
+
+## Development
+
+```sh
+npm run build
+npm test
+npm run format:check
+```
+
+Frontend files are in `frontend/`; `server.js`, `library.js`, and `analytics.js` serve
+live data. This is a local prototype bound to loopback, not a multi-user instructor
+portal. Instructor filtering is a browsing preference; Mediasite account permissions
+control actual access. No API explorer or write operations are included.
+
+## Repository
+
+This dashboard has its own [Git repository](https://github.austin.utexas.edu/bollox/mediasite-dashboard).
+See [CHANGELOG.md](CHANGELOG.md) for releases and [HANDOFF.md](HANDOFF.md) for project status.
+The adjacent API Tester is a separate project and is not modified by this dashboard.

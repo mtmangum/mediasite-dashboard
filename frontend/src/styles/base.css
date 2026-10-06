@@ -1,0 +1,200 @@
+/* Design tokens, theme toggle, reset, and form controls. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/InterVariable.woff2") format("woff2");
+}
+:root {
+  color-scheme: light;
+  --font-ui: "Inter", system-ui, sans-serif;
+  --text-small: 12px;
+  --text-card: 13px;
+  --text-title: 17px;
+  --text-metric: 24px;
+  --ut-orange: #bf5700;
+  --ut-charcoal: #333f48;
+  --ut-stone: #d6d2c4;
+  --control-height: 40px;
+  --control-radius: 8px;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%2356646d' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  --button: var(--ut-orange);
+  --thumb-start: var(--ut-stone);
+  --thumb-end: #eeece6;
+  --bg: #f5f4f0;
+  --panel: #fff;
+  --fg: var(--ut-charcoal);
+  --muted: #56646d;
+  --line: var(--ut-stone);
+  --accent: var(--ut-orange);
+  --focus: var(--ut-orange);
+  --ok: #386a28;
+  --bad: #9a3412;
+  --soft: #eeece6;
+  --card-shadow: 0 6px 18px #00000010;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none' stroke='%23b6c0c5' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+  --bg: #171c1f;
+  --panel: #22292e;
+  --fg: #ffffff;
+  --muted: #b6c0c5;
+  --line: #46525b;
+  --accent: #ffffff;
+  --focus: #f8971f;
+  --ok: #a6cd57;
+  --bad: #ffd600;
+  --soft: var(--ut-charcoal);
+  --card-shadow: 0 8px 22px #00000030;
+  --thumb-start: var(--ut-charcoal);
+  --thumb-end: #252e34;
+}
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.theme-icon {
+  width: 17px;
+  height: 17px;
+}
+.sun,
+[data-theme="dark"] .moon {
+  display: none;
+}
+[data-theme="dark"] .sun {
+  display: inline;
+}
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 14px/1.6 var(--font-ui);
+  font-optical-sizing: auto;
+}
+a {
+  color: var(--accent);
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button,
+a,
+input,
+select,
+textarea {
+  outline-offset: 4px;
+}
+button {
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: var(--control-radius);
+  padding: 9px 12px;
+  background: var(--button);
+  color: white;
+  font-weight: 600;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+button.secondary {
+  background: var(--panel);
+  border-color: var(--line);
+  color: var(--fg);
+}
+button:hover {
+  filter: brightness(0.96);
+}
+input,
+select,
+textarea {
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: var(--control-radius);
+  padding: 9px 12px;
+  min-width: 0;
+}
+button,
+input,
+select,
+.watch {
+  min-height: var(--control-height);
+  line-height: 20px;
+}
+input,
+select {
+  height: var(--control-height);
+}
+input,
+select,
+textarea {
+  appearance: none;
+  -webkit-appearance: none;
+}
+select {
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+  cursor: pointer;
+}
+button:focus-visible,
+.watch:focus-visible {
+  outline: 2px solid var(--focus);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--focus);
+}
+textarea {
+  width: 100%;
+  min-height: 130px;
+  font-family: ui-monospace, monospace;
+}
+.badge {
+  display: inline-block;
+  background: var(--soft);
+  color: var(--fg);
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.ok {
+  color: var(--ok);
+}
+.bad {
+  color: var(--bad);
+}
+label {
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 5px;
+}
+details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+details[open] summary {
+  margin-bottom: 12px;
+}
