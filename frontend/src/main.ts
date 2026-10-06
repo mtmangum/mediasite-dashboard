@@ -79,6 +79,7 @@ function render() {
   if (!list.some((c) => c.key === selected)) selected = list[0]?.key || "";
   const course = current();
   element("courseCount").textContent = String(list.length);
+  element("semesterLabel").textContent = term.value.toUpperCase();
   element("courses").innerHTML = list
     .map(
       (c) =>
