@@ -166,7 +166,7 @@ function timelinePanel(
         2) /
       end) *
     100;
-  const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L${(lastEnd / end) * 600} 176 L${(Math.min(end, timeline[0].startSeconds) / end) * 600} 176 Z"/><path class="chart-line" d="${line}"/><path class="chart-marker" d="M0 0V180" hidden/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><circle class="chart-point" r="4" cy="0"/></g>`;
+  const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L${(lastEnd / end) * 600} 176 L${(Math.min(end, timeline[0].startSeconds) / end) * 600} 176 Z"/><path class="chart-line" d="${line}"/><path class="chart-marker" d="M0 0V180" hidden/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><g class="chart-point"><path d="M0 0h0"/><path d="M0 0h0"/></g></g>`;
   const edge = peakX < 14 ? " start" : peakX > 86 ? " end" : "";
   const overlay = `<span class="peak-label${edge}" style="left:${peakX}%;top:${(y(peakSegment.views, max) / 180) * 100}%">Most replayed · ${esc(fmtClock(peakSegment.startSeconds))}</span>`;
   const top = [...timeline]
@@ -325,7 +325,7 @@ function retentionPanel(
     line += ` H${(times[i] / longest) * 600} V${sy((times.length - j) / times.length)}`;
     i = j;
   }
-  const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L0 176 Z"/><path class="chart-line" d="${line}"/><path class="chart-grid" d="M0 92H600"/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><circle class="chart-point" r="4" cy="0"/></g>`;
+  const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L0 176 Z"/><path class="chart-line" d="${line}"/><path class="chart-grid" d="M0 92H600"/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><g class="chart-point"><path d="M0 0h0"/><path d="M0 0h0"/></g></g>`;
   const medianX =
     medianSeconds === null
       ? null
@@ -616,14 +616,14 @@ function bindCrosshair(
   },
 ) {
   const selection = svg.querySelector<SVGGElement>(".chart-selection")!;
-  const point = selection.querySelector("circle")!;
+  const point = selection.querySelector(".chart-point")!;
   let current = config.start;
   const select = (index: number) => {
     current = Math.max(0, Math.min(config.steps - 1, index));
     const r = config.readout(current);
     selection.removeAttribute("hidden");
     selection.setAttribute("transform", `translate(${r.x},0)`);
-    point.setAttribute("cy", String(r.cy));
+    point.setAttribute("transform", `translate(0,${r.cy})`);
     const box = svg.getBoundingClientRect();
     const px = box.left + (r.x / 600) * box.width;
     const py = box.top + (r.cy / 180) * box.height;

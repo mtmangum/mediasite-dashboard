@@ -19,6 +19,7 @@ import {
 import type { Frame } from "./recording-pane";
 import { renderViewingCharts } from "./viewing-charts";
 
+let multiInstructor = false;
 let courses: Course[] = [],
   selected = "",
   mode = "demo",
@@ -61,12 +62,12 @@ function termOrder(value: string) {
   );
 }
 function updateTerms() {
-  options(
-    term,
-    [...new Set(courses.map((c) => c.semester))].sort(
-      (a, b) => termOrder(b) - termOrder(a),
-    ),
+  const terms = [...new Set(courses.map((c) => c.semester))].sort(
+    (a, b) => termOrder(b) - termOrder(a),
   );
+  options(term, terms);
+  // One semester needs no control: the page heading already names it.
+  element("semesterBlock").hidden = terms.length < 2;
 }
 function filteredItems() {
   return (current()?.items || []).filter((i) =>
@@ -74,6 +75,28 @@ function filteredItems() {
       .toLowerCase()
       .includes(search.value.toLowerCase()),
   );
+}
+function courseSummary(c: Course) {
+  const { sessions } = courseMetrics(c, reports, "all", now);
+  return [
+    `${c.items.length} lectures`,
+    sessions !== null && `${number(sessions)} sessions`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+function dateRange(c: Course) {
+  const times = c.items
+    .map(recordingDate)
+    .filter((t): t is number => t !== null);
+  if (!times.length) return "";
+  const first = new Date(Math.min(...times)),
+    last = new Date(Math.max(...times));
+  const day = { month: "short", day: "numeric" } as const;
+  const text = (d: Date, year: boolean) =>
+    d.toLocaleDateString([], year ? { ...day, year: "numeric" } : day);
+  const sameYear = first.getFullYear() === last.getFullYear();
+  return `${text(first, !sameYear)} – ${text(last, true)}`;
 }
 function render() {
   const list = visible();
@@ -84,13 +107,13 @@ function render() {
   element("courses").innerHTML = list
     .map(
       (c) =>
-        `<button data-course="${esc(c.key)}" class="course-link ${c.key === selected ? "active" : ""}" ${c.key === selected ? 'aria-current="true"' : ""}><strong>${esc(c.code)}</strong><span>${esc(c.title)}</span><small>${c.items.length} lectures${c.section ? ` · ${esc(c.section)}` : ""}</small></button>`,
+        `<button data-course="${esc(c.key)}" class="course-link ${c.key === selected ? "active" : ""}" ${c.key === selected ? 'aria-current="true"' : ""}><strong>${esc(c.code)}${c.section ? `<em>Section ${esc(c.section)}</em>` : ""}</strong><span>${esc(c.title)}</span><small>${courseSummary(c)}</small></button>`,
     )
     .join("");
   element("overview").innerHTML = course
     ? (() => {
         const m = courseMetrics(course, reports, windowValue(), now);
-        return `<div class="course-heading"><div><span class="eyebrow">${esc(course.code)}${course.section ? ` · SECTION ${esc(course.section)}` : ""}</span><h2>${esc(course.title)}</h2><p class="muted"><span class="person">${esc(course.instructor)}</span> · ${esc(course.semester)}</p></div><span class="badge">${course.items.length} recordings</span></div><div class="metrics">${[
+        return `<div class="course-heading"><div><span class="eyebrow">${esc(course.code)}${course.section ? ` · SECTION ${esc(course.section)}` : ""}</span><h2>${esc(course.title)}</h2><p class="muted">${[multiInstructor && `<span class="person">${esc(course.instructor)}</span>`, dateRange(course)].filter(Boolean).join(" · ")}</p></div></div><div class="metrics">${[
           ["Sessions", number(m.sessions), "Anonymous viewing visits"],
           [
             "Median watch time",
@@ -98,24 +121,23 @@ function render() {
             "Among sessions with watch time",
           ],
           ["Completion", percent(m.completion), "85% coverage of a recording"],
-          [
-            "Reports available",
-            `${m.available} / ${course.items.length}`,
-            "Included in these metrics",
-          ],
         ]
           .map(
             ([label, value, note]) =>
               `<div class="metric"><span>${label}</span><strong>${value}</strong><small>${note}</small></div>`,
           )
-          .join("")}</div>`;
+          .join("")}</div>${
+          !busy && m.available < course.items.length
+            ? `<p class="metrics-note muted">Totals exclude ${course.items.length - m.available} of ${course.items.length} recordings whose reports are unavailable.</p>`
+            : ""
+        }`;
       })()
     : '<p class="empty">No courses available for this selection.</p>';
   element("comparison").innerHTML =
-    `<div class="table-scroll"><table><thead><tr><th scope="col">Course</th><th scope="col">Sessions</th><th scope="col">Median watch</th><th scope="col">Completion</th><th scope="col">Reports</th></tr></thead><tbody>${list
+    `<div class="table-scroll"><table><thead><tr><th scope="col">Course</th><th scope="col">Sessions</th><th scope="col">Median watch</th><th scope="col">Completion</th></tr></thead><tbody>${list
       .map((c) => {
         const m = courseMetrics(c, reports, windowValue(), now);
-        return `<tr><th scope="row"><button class="table-course" data-course="${esc(c.key)}">${esc(c.code)}${c.section ? ` · ${esc(c.section)}` : ""}</button></th><td>${number(m.sessions)}</td><td>${span(m.median)}</td><td>${percent(m.completion)}</td><td>${m.available}/${c.items.length}</td></tr>`;
+        return `<tr><th scope="row"><button class="table-course" data-course="${esc(c.key)}">${esc(c.code)}${c.section ? ` · ${esc(c.section)}` : ""}</button></th><td>${number(m.sessions)}</td><td>${span(m.median)}</td><td>${percent(m.completion)}</td></tr>`;
       })
       .join(
         "",
@@ -214,21 +236,15 @@ async function load(fresh = false) {
         ? names[0]
         : "Your workspace";
     element("instructorName").textContent = name;
-    element("instructorInitials").textContent =
-      name === "Your workspace"
-        ? "M"
-        : name
-            .split(/\s+/)
-            .map((part) => part[0])
-            .slice(0, 2)
-            .join("")
-            .toUpperCase();
+    element("instructorMeta").textContent =
+      `${items.length} recording${items.length === 1 ? "" : "s"}`;
+    multiInstructor = names.length > 1;
     updateTerms();
     render();
     element("mode").textContent = mode === "demo" ? "Sample data" : "Live data";
-    element("modeNote").textContent =
+    element("mode").title =
       mode === "demo"
-        ? "Fictional courses and sessions. Real illustrative lecture frames."
+        ? "Fictional courses and sessions with real illustrative lecture frames."
         : "Read-only reports from your Mediasite account.";
     await loadReports(items, fresh);
     element("status").textContent =

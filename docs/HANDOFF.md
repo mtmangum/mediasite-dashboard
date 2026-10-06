@@ -28,6 +28,8 @@ Do not push it to the old app's remotes or change the old app unless requested.
 - Live mode should load full history through API pagination, beyond the old 100-item limit.
 - Start in sample-data mode, without copying the original app's credentials.
 - User prefers concise documentation and readable interfaces.
+- Keep the sidebar minimal: profile (name, recording count), semester only when several,
+  courses. No avatar (the name is inferred, not a login identity). Show each fact once.
 - No instructor selector: each dashboard is an instructor workspace. Display a name
   when the library metadata is consistent, otherwise "Your workspace". Browse the
   account-accessible library without filtering access by inferred instructor names.

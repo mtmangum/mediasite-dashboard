@@ -14,6 +14,7 @@
       />
       <div class="topbar-right">
         <span>Mediasite</span
+        ><span class="badge mode-badge" id="mode" tabindex="0">Connecting</span
         ><button id="themeToggle" class="secondary theme-toggle">
           <span id="themeLabel">Dark mode</span>
         </button>
@@ -21,29 +22,25 @@
     </header>
     <div class="shell">
       <aside>
-        <div class="workspace-mark">M<span>Instructor workspace</span></div>
-        <p class="eyebrow">YOUR LIBRARY</p>
         <div class="instructor-profile">
-          <span
-            class="profile-avatar"
-            aria-hidden="true"
-            id="instructorInitials"
-            >M</span
-          >
-          <div>
-            <strong id="instructorName">Your workspace</strong
-            ><span>Instructor</span>
-          </div>
+          <strong id="instructorName">Your workspace</strong>
+          <span id="instructorMeta"></span>
         </div>
-        <label for="semester">Semester</label>
-        <select id="semester"></select>
-        <div class="nav-heading">Courses <span id="courseCount"></span></div>
+        <div id="semesterBlock">
+          <label for="semester">Semester</label>
+          <select id="semester"></select>
+        </div>
+        <div class="nav-heading">
+          <span>Courses <span id="courseCount"></span></span>
+          <details class="hint">
+            <summary aria-label="How courses are grouped">ⓘ</summary>
+            <p>
+              Courses are grouped from recording titles and dates. They are
+              suggestions, not verified enrollment.
+            </p>
+          </details>
+        </div>
         <nav id="courses" aria-label="Courses"></nav>
-        <div class="aside-note">
-          <span class="badge" id="mode">Connecting</span>
-          <p id="modeNote">Loading your workspace…</p>
-          <p>Course groups are suggested from recording metadata.</p>
-        </div>
       </aside>
       <main id="workspace">
         <div class="page-heading">

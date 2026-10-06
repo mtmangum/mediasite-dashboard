@@ -30,7 +30,7 @@ Credentials stay in `.env` and on the Node server. They are not copied from the 
 
 ## Use the dashboard
 
-- Select a **semester** and **course** in your instructor workspace. Lectures appear in chronological order.
+- Select a **course** in your workspace (and a **semester**, when there is more than one). Lectures appear in chronological order.
 - Compare **All time**, **First 7 days**, or **Last 30 days** viewing activity.
 - Select a lecture for its full **all-time** engagement, retention, and audience charts.
 - In a lecture report, click the engagement chart (or a most-replayed moment) to see that

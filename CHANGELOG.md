@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Simplified the sidebar: removed the placeholder "M Instructor workspace" mark, the avatar,
+  and repeated labels. The profile shows the name and recording count, the semester selector
+  appears only with more than one semester, course cards show sessions, the grouping caveat
+  is an info hint, and the sample/live badge moved to the header.
+- Removed repeated instructor, semester, and recording-count text from the course heading,
+  and replaced the "Reports available" tile and column with a note shown only when reports
+  are missing.
+- Fixed the stretched scrub marker on the engagement and retention charts.
 - Paired the engagement chart with the recording: choosing a moment shows it in the
   recording (Mediasite player in live mode, nearest sample frame in the demo).
 - Added a static sample-data build (`npm run build:demo`) and a GitHub Pages workflow

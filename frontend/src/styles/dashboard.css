@@ -33,20 +33,6 @@ aside {
   border-right: 1px solid var(--line);
   background: var(--panel);
 }
-.workspace-mark {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  font-size: 25px;
-  font-weight: 800;
-  color: var(--ut-orange);
-  margin-bottom: 34px;
-}
-.workspace-mark span {
-  font-size: 13px;
-  color: var(--fg);
-  font-weight: 600;
-}
 .eyebrow {
   font-size: 10px;
   font-weight: 700;
@@ -60,12 +46,43 @@ aside select {
 }
 .nav-heading {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  position: relative;
   font-weight: 600;
   margin: 14px 0;
 }
-.nav-heading span {
+.nav-heading span span {
   color: var(--muted);
+  font-weight: 400;
+}
+.hint summary {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--muted);
+  cursor: pointer;
+  list-style: none;
+}
+.hint summary::-webkit-details-marker {
+  display: none;
+}
+.hint p {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 3;
+  width: 200px;
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--card-shadow);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
 }
 .course-link {
   display: flex;
@@ -80,8 +97,18 @@ aside select {
   border: 1px solid transparent;
 }
 .course-link strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 8px;
   color: var(--ink-course);
   font-size: 13px;
+}
+.course-link strong em {
+  color: var(--muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 400;
 }
 .course-link span {
   font-weight: 400;
@@ -96,14 +123,6 @@ aside select {
   background: var(--soft);
   border-color: var(--line);
   box-shadow: inset 3px 0 var(--ut-orange);
-}
-.aside-note {
-  margin-top: 50px;
-  color: var(--muted);
-  font-size: 11px;
-}
-.aside-note p {
-  line-height: 1.7;
 }
 main {
   padding: 36px 44px;
@@ -152,7 +171,7 @@ h2 {
 }
 .metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 28px;
 }
@@ -410,11 +429,6 @@ dialog::backdrop {
     border-right: 0;
     border-bottom: 1px solid var(--line);
   }
-  .workspace-mark,
-  .aside-note,
-  aside > .eyebrow {
-    display: none;
-  }
   aside label {
     display: inline-block;
     margin-right: 10px;
@@ -439,6 +453,9 @@ dialog::backdrop {
   }
   .metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .metric:last-child {
+    grid-column: 1 / -1;
   }
   .page-heading {
     align-items: flex-start;
@@ -471,9 +488,6 @@ dialog::backdrop {
   .table-note {
     padding: 14px 18px;
   }
-  .course-heading .badge {
-    display: none;
-  }
   dialog {
     padding: 18px;
   }
@@ -492,38 +506,33 @@ dialog::backdrop {
 }
 
 .instructor-profile {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 0 0 26px;
-}
-.profile-avatar {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--soft);
-  color: var(--fg);
-  font-size: 12px;
-  font-weight: 650;
-  flex-shrink: 0;
+  margin: 0 0 24px;
 }
 .instructor-profile strong {
   display: block;
   color: var(--ink-person);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 650;
 }
-.instructor-profile div > span {
+.instructor-profile span {
   display: block;
+  margin-top: 2px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 @media (max-width: 760px) {
   .instructor-profile {
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
+}
+.mode-badge {
+  background: #ffffff26;
+  color: #fff;
+  cursor: help;
+}
+.metrics-note {
+  margin: -12px 0 24px;
+  font-size: 11px;
 }
 .demo-banner {
   padding: 6px 16px;
