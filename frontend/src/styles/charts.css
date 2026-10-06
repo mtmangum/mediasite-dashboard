@@ -470,3 +470,111 @@
     grid-column: auto;
   }
 }
+/* The recording beside the engagement chart. */
+.recording-sync {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr);
+  gap: 16px;
+  margin: 14px 0 18px;
+}
+.recording-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--soft);
+}
+.recording-screen iframe,
+.recording-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+}
+.recording-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 32px;
+  color: var(--muted);
+}
+.recording-play {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+}
+.recording-badge {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--fg);
+  font-size: 11px;
+}
+.recording-bar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-top: 8px;
+  font-size: var(--text-small);
+}
+.recording-time {
+  color: var(--ink-course);
+  font-weight: 600;
+}
+.recording-open {
+  color: var(--ink-person);
+}
+.moments h4 {
+  margin: 0 0 8px;
+  font-size: var(--text-card);
+}
+.moments ol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.moment {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--fg);
+  text-align: left;
+}
+.moment strong {
+  color: var(--ink-course);
+  font-variant-numeric: tabular-nums;
+}
+.moment span {
+  color: var(--muted);
+  font-size: var(--text-small);
+}
+.moment:hover,
+.moment.active {
+  border-color: var(--ink-course);
+}
+.chart-marker {
+  fill: none;
+  stroke: var(--ink-course);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+@media (max-width: 760px) {
+  .recording-sync {
+    grid-template-columns: 1fr;
+  }
+}

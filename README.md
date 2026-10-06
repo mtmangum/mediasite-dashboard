@@ -33,6 +33,9 @@ Credentials stay in `.env` and on the Node server. They are not copied from the 
 - Select a **semester** and **course** in your instructor workspace. Lectures appear in chronological order.
 - Compare **All time**, **First 7 days**, or **Last 30 days** viewing activity.
 - Select a lecture for its full **all-time** engagement, retention, and audience charts.
+- In a lecture report, click the engagement chart (or a most-replayed moment) to see that
+  point in the recording. Live data opens the Mediasite player there on request; the sample
+  demo shows the nearest sample frame.
 - Use **Refresh** to reload the library and reports; **Retry reports** retries unavailable analytics.
 - Search lecture titles or descriptions, or export the selected course's metrics as CSV.
 

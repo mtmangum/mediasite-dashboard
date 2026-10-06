@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Paired the engagement chart with the recording: choosing a moment shows it in the
+  recording (Mediasite player in live mode, nearest sample frame in the demo).
 - Added a static sample-data build (`npm run build:demo`) and a GitHub Pages workflow
   for `mtmangum/mediasite-dashboard`. The demo omits the university wordmark.
 - Replaced instructor selection with a profile display for a personal instructor

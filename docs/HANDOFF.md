@@ -40,7 +40,9 @@ The initial instructor dashboard is implemented. It includes:
 - Course comparisons, pooled median watch time, coverage-based completion, and
   all-time/first-seven-days/last-thirty-days reporting windows.
 - Search, course CSV export, report retries, refresh, and light/dark themes.
-- Detailed all-time interactive lecture charts in a keyboard-dismissable dialog.
+- Detailed all-time interactive lecture charts in a keyboard-dismissable dialog. Choosing a
+  moment on the engagement chart shows it in a recording pane; the live player loads only on
+  request, since playing it registers a session in that lecture's analytics.
 - Two fictional courses and 24 sample lectures with illustrative screenshots.
 - A read-only loopback server, server-side credential configuration, full library
   pagination, and explicit unavailable metrics when reports cannot be loaded.
@@ -57,7 +59,9 @@ fixed hidden tooltip display and positioned report tooltips inside their contain
 The Texas wordmark now has an explicit SVG viewBox and scales by height with auto
 width, preserving its original proportions in desktop and compact headers.
 
-Remaining validation: exercise live data with an authorized Mediasite account and
+Remaining validation: confirm the live recording pane (it embeds the Mediasite Play page and
+seeks with `?playFrom=<ms>&autoStart=true`; the embed and parameters are unverified, and a
+link to open the player in a new tab is the fallback); exercise live data with an authorized Mediasite account and
 verify small-screen behavior on a mobile device. No live credentials are configured.
 This remains a local prototype, not a multi-user instructor portal. The original
 `../apiTest` project and repository were preserved.

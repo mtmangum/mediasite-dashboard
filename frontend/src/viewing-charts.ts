@@ -1,4 +1,5 @@
 import { esc, fmtClock, fmtSpan, fmtTime } from "./format";
+import { bindRecording, recordingPane, type Frame } from "./recording-pane";
 import type { Presentation, SessionRecord, ViewingCharts } from "./shared";
 import {
   COMPLETE_SHARE,
@@ -124,6 +125,8 @@ function timelinePanel(
   data: ViewingCharts,
   end: number,
   peakSegment: ReturnType<typeof replayPeak>,
+  presentation: Presentation,
+  frames: Frame[] | null,
 ) {
   const { timeline } = data;
   if (timeline === null)
@@ -163,29 +166,37 @@ function timelinePanel(
         2) /
       end) *
     100;
-  const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L${(lastEnd / end) * 600} 176 L${(Math.min(end, timeline[0].startSeconds) / end) * 600} 176 Z"/><path class="chart-line" d="${line}"/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><circle class="chart-point" r="4" cy="0"/></g>`;
+  const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L${(lastEnd / end) * 600} 176 L${(Math.min(end, timeline[0].startSeconds) / end) * 600} 176 Z"/><path class="chart-line" d="${line}"/><path class="chart-marker" d="M0 0V180" hidden/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><circle class="chart-point" r="4" cy="0"/></g>`;
   const edge = peakX < 14 ? " start" : peakX > 86 ? " end" : "";
   const overlay = `<span class="peak-label${edge}" style="left:${peakX}%;top:${(y(peakSegment.views, max) / 180) * 100}%">Most replayed · ${esc(fmtClock(peakSegment.startSeconds))}</span>`;
   const top = [...timeline]
     .filter((s) => s.views > 0)
     .sort((a, b) => b.views - a.views || a.startSeconds - b.startSeconds)
     .slice(0, 10);
+  const moments = top
+    .slice(0, 5)
+    .map(
+      (s) =>
+        `<li><button type="button" class="moment" data-seek="${s.startSeconds}"><strong>${esc(fmtClock(s.startSeconds))}</strong><span>${esc(plural(s.views, "view"))}</span></button></li>`,
+    )
+    .join("");
   return panel(
     "Engagement across the recording",
-    "How many views each stretch of the recording received, including replays. Hover or tap the chart to read a moment; arrow keys work when it is focused.",
-    plot(
-      "segment",
-      "Segment views along the recording",
-      `${timeline.length} segments. Peak ${count(peakSegment.views)} views at ${fmtClock(peakSegment.startSeconds)}.`,
-      max,
-      marks,
-      [0, 0.25, 0.5, 0.75, 1].map((fraction) => ({
-        fraction,
-        label: fmtClock(end * fraction),
-      })),
-      "Position in the recording · min:sec",
-      { focusable: true, overlay },
-    ) +
+    "How many views each stretch of the recording received, including replays. Hover to read a moment; click, tap, or press Enter to see it in the recording.",
+    `<div class="recording-sync">${recordingPane(presentation, frames)}<div class="moments"><h4>Most replayed moments</h4><ol>${moments}</ol></div></div>` +
+      plot(
+        "segment",
+        "Segment views along the recording",
+        `${timeline.length} segments. Peak ${count(peakSegment.views)} views at ${fmtClock(peakSegment.startSeconds)}.`,
+        max,
+        marks,
+        [0, 0.25, 0.5, 0.75, 1].map((fraction) => ({
+          fraction,
+          label: fmtClock(end * fraction),
+        })),
+        "Position in the recording · min:sec",
+        { focusable: true, overlay },
+      ) +
       dataTable(
         "Most replayed moments",
         ["Moment", "Views"],
@@ -411,6 +422,7 @@ export function renderViewingCharts(
   container: HTMLElement,
   data: ViewingCharts,
   presentation: Presentation,
+  frames: Frame[] | null = null,
 ) {
   const { timeline, sessions, viewers } = data;
   const end = presentation.durationMs
@@ -517,7 +529,7 @@ export function renderViewingCharts(
           .map((n) => `<li>${esc(n)}</li>`)
           .join("")}</ul>`
       : ""
-  }<div class="viewing-grid">${timelinePanel(data, end, peakSegment)}${
+  }<div class="viewing-grid">${timelinePanel(data, end, peakSegment, presentation, frames)}${
     sessions
       ? daysPanel(all) + heatmapPanel(heatmap)
       : panel(
@@ -534,7 +546,14 @@ export function renderViewingCharts(
         )
   }${retentionPanel(data, sessions, stats.medianWatched)}${audiencePanel(sessions, viewers)}</div><p class="chart-caption muted">Updated ${esc(fmtTime(data.fetchedAt))} · Sessions are not unique viewers; viewers are counted by network address and no identities are shown. Day and hour charts use your browser's time zone. Timeline counts can differ because of reporting thresholds.</p>`;
 
-  bindInteractions(container, timeline, end, peakSegment, sessions);
+  bindInteractions(
+    container,
+    timeline,
+    end,
+    peakSegment,
+    sessions,
+    bindRecording(container, presentation, frames),
+  );
 }
 
 // A single floating readout, shared by every chart in the dialog. It is anchored to the mark
@@ -587,6 +606,7 @@ function bindCrosshair(
     steps: number;
     start: number;
     locate: (fraction: number) => number;
+    commit?: (index: number) => void;
     readout: (index: number) => {
       x: number;
       cy: number;
@@ -627,6 +647,7 @@ function bindCrosshair(
   svg.addEventListener("pointermove", (event) => {
     if (event.pointerType === "mouse" || event.buttons) aim(event);
   });
+  svg.addEventListener("click", () => config.commit?.(current));
   svg.addEventListener("pointerleave", clear);
   svg.addEventListener("focus", () => select(current));
   svg.addEventListener("blur", clear);
@@ -640,6 +661,8 @@ function bindCrosshair(
     if (event.key in step) select(current + step[event.key]);
     else if (event.key === "Home") select(0);
     else if (event.key === "End") select(config.steps - 1);
+    else if (config.commit && (event.key === "Enter" || event.key === " "))
+      config.commit(current);
     else return;
     event.preventDefault();
   });
@@ -651,6 +674,7 @@ function bindInteractions(
   end: number,
   peakSegment: ReturnType<typeof replayPeak>,
   sessions: SessionRecord[] | null,
+  showInRecording: (seconds: number) => void,
 ) {
   const tip = createTip(container);
 
@@ -687,9 +711,29 @@ function bindInteractions(
   );
   if (timelineSvg && timeline?.length && peakSegment) {
     const max = niceMax(peakSegment.views);
+    const marker = timelineSvg.querySelector<SVGPathElement>(".chart-marker")!;
+    const choose = (seconds: number) => {
+      marker.setAttribute(
+        "transform",
+        `translate(${(Math.min(end, seconds) / end) * 600},0)`,
+      );
+      marker.removeAttribute("hidden");
+      container.querySelectorAll<HTMLElement>("[data-seek]").forEach((b) => {
+        b.classList.toggle("active", Number(b.dataset.seek) === seconds);
+      });
+      showInRecording(seconds);
+    };
+    container
+      .querySelectorAll<HTMLElement>("[data-seek]")
+      .forEach((button) =>
+        button.addEventListener("click", () =>
+          choose(Number(button.dataset.seek)),
+        ),
+      );
     bindCrosshair(timelineSvg, tip, {
       steps: timeline.length,
       start: timeline.indexOf(peakSegment),
+      commit: (index) => choose(timeline[index].startSeconds),
       locate: (fraction) => {
         const seconds = fraction * end;
         let closest = 0,

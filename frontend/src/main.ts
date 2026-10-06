@@ -16,6 +16,7 @@ import {
   type Course,
   type ReportingWindow,
 } from "./course-model";
+import type { Frame } from "./recording-pane";
 import { renderViewingCharts } from "./viewing-charts";
 
 let courses: Course[] = [],
@@ -247,7 +248,18 @@ function openDetail(id: string) {
   element("detailMeta").textContent =
     `${item.title || "Untitled"} · ${fmtDuration(item.durationMs)}`;
   const data = reports.get(id);
-  if (data) renderViewingCharts(element("detailBody"), data, item);
+  if (data)
+    renderViewingCharts(
+      element("detailBody"),
+      data,
+      item,
+      mode === "demo"
+        ? (
+            demoResponse("GET", "/preview.json", new URLSearchParams({ id }))!
+              .body as { frames: Frame[] }
+          ).frames
+        : null,
+    );
   else
     element("detailBody").innerHTML =
       `<p class="empty">${esc(failures.get(id) || "Report is loading. Close and reopen when reports finish loading.")}</p>`;
