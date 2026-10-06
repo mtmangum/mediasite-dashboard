@@ -71,7 +71,8 @@ The Texas wordmark now has an explicit SVG viewBox and scales by height with aut
 width, preserving its original proportions in desktop and compact headers.
 
 Remaining validation: confirm the live recording pane (it embeds the Mediasite Play page and
-seeks with `?playFrom=<ms>&autoStart=true`; the embed and parameters are unverified, and a
+seeks with `?playFrom=<ms>&autostart=true` (public Mediasite docs confirm only `autostart`; the
+start-time parameter and the embed itself are unverified, so the pane tells viewers where to scrub), and a
 link to open the player in a new tab is the fallback); exercise live data with an authorized Mediasite account and
 verify small-screen behavior on a mobile device. No live credentials are configured.
 This remains a local prototype, not a multi-user instructor portal. The original

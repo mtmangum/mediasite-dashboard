@@ -122,6 +122,12 @@ select,
 textarea {
   outline-offset: 4px;
 }
+button,
+summary,
+a {
+  /* The default tap flash is a square blue overlay that ignores rounded corners. */
+  -webkit-tap-highlight-color: transparent;
+}
 button {
   cursor: pointer;
   border: 1px solid transparent;

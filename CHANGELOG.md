@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Recording pane uses the documented `autostart` parameter and says where to scrub if the
+  player ignores the start time.
+- Chart area fades are now neutral Blue Gray rather than a tint of burnt orange.
+- Mobile: removed the square tap-highlight flash, enlarged the info-hint target, and widened
+  strip bars on narrow screens.
 - Rebalanced color using the UT Brand Center palette: burnt orange now marks course identity
   and the main data lines; Dark Teal (Cyan in dark mode) carries data values, selections,
   and heatmap/calendar shading; Blue Gray is the neutral. Replaced the non-UT blue.

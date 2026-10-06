@@ -10,7 +10,7 @@ test("opens the Mediasite player at a moment, in milliseconds", async () => {
   );
   assert.equal(url.origin + url.pathname, "https://m.test/Mediasite/Play/a");
   assert.equal(url.searchParams.get("playFrom"), "90400");
-  assert.equal(url.searchParams.get("autoStart"), "true");
+  assert.equal(url.searchParams.get("autostart"), "true");
 });
 
 test("refuses links that are not http(s)", async () => {

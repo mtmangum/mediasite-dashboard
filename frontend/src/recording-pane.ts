@@ -13,7 +13,7 @@ export function playUrl(p: Presentation, seconds: number, autoStart = true) {
     const url = new URL(p.watchUrl);
     if (url.protocol !== "https:" && url.protocol !== "http:") return null;
     url.searchParams.set("playFrom", String(Math.round(seconds * 1000)));
-    url.searchParams.set("autoStart", String(autoStart));
+    url.searchParams.set("autostart", String(autoStart));
     return url.toString();
   } catch {
     return null;
@@ -84,7 +84,11 @@ export function bindRecording(
       const href = playUrl(p, seconds);
       if (href) open.href = href;
     }
-    // Once the player is open the viewer has chosen to watch, so follow the chart.
-    if (player) load(seconds);
+    // Once the player is open the viewer has chosen to watch, so follow the chart. The start-time
+    // parameter is not in Mediasite's public documentation, so say where to scrub if it is ignored.
+    if (player) {
+      load(seconds);
+      time.textContent = `Selected ${fmtClock(seconds)} · if the player starts at the beginning, scrub to ${fmtClock(seconds)}`;
+    }
   };
 }

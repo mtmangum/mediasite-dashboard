@@ -892,6 +892,13 @@ th[aria-sort="descending"] .sort {
     flex-wrap: wrap;
     justify-content: flex-end;
   }
+  .strip {
+    gap: 3px;
+  }
+  .hint summary {
+    width: 32px;
+    height: 32px;
+  }
   .strip,
   .strip-axis {
     padding-left: 14px;

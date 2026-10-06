@@ -138,11 +138,11 @@
   fill: url(#timelineWash);
 }
 .chart-wash-top {
-  stop-color: var(--chart-1);
-  stop-opacity: 0.22;
+  stop-color: var(--strip-base);
+  stop-opacity: 0.35;
 }
 .chart-wash-bottom {
-  stop-color: var(--chart-1);
+  stop-color: var(--strip-base);
   stop-opacity: 0;
 }
 .chart-bar {
