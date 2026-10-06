@@ -2,12 +2,12 @@
 :root {
   /* Validated pair (orange + blue) and a neutral for "other". */
   --chart-1: #bf5700;
-  --chart-2: #2a78d6;
-  --chart-3: #8a9399;
+  --chart-2: #005f86;
+  --chart-3: #9cadb7;
 }
 :root[data-theme="dark"] {
   --chart-1: #e0701c;
-  --chart-2: #4a8be0;
+  --chart-2: #00a9b7;
   --chart-3: #7c8890;
 }
 #viewingCharts {
@@ -239,11 +239,11 @@
 }
 .chart-axis-label {
   margin: 2px 0 12px 32px;
-  font-size: 10px;
+  font-size: 11px;
 }
 .chart-y-axis,
 .chart-x-axis {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -255,7 +255,7 @@
   gap: 4px 6px;
   margin-top: 14px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 .hm-hours,
 .hm-row {
@@ -276,7 +276,7 @@
   border-radius: 3px;
   background: color-mix(
     in srgb,
-    var(--chart-1) calc(var(--level) * 100%),
+    var(--heat) calc(var(--level) * 100%),
     var(--soft)
   );
 }
@@ -293,7 +293,7 @@
   justify-content: flex-end;
   gap: 8px;
   margin-top: 10px;
-  font-size: 10px;
+  font-size: 11px;
 }
 .hm-legend i {
   width: 72px;
@@ -301,8 +301,8 @@
   border-radius: 4px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--chart-1) 30%, var(--soft)),
-    var(--chart-1)
+    color-mix(in srgb, var(--heat) 30%, var(--soft)),
+    var(--heat)
   );
 }
 .device-bar {
@@ -535,7 +535,7 @@
   font-size: var(--text-small);
 }
 .recording-time {
-  color: var(--ink-course);
+  color: var(--ink-data);
   font-weight: 600;
 }
 .recording-open {
@@ -566,7 +566,7 @@
   text-align: left;
 }
 .moment strong {
-  color: var(--ink-course);
+  color: var(--ink-data);
   font-variant-numeric: tabular-nums;
 }
 .moment span {
@@ -575,11 +575,11 @@
 }
 .moment:hover,
 .moment.active {
-  border-color: var(--ink-course);
+  border-color: var(--ink-data);
 }
 .chart-marker {
   fill: none;
-  stroke: var(--ink-course);
+  stroke: var(--ink-data);
   stroke-width: 2;
   vector-effect: non-scaling-stroke;
 }
@@ -587,4 +587,8 @@
   .recording-sync {
     grid-template-columns: 1fr;
   }
+}
+.device-single {
+  margin: 14px 0;
+  font-size: 13px;
 }

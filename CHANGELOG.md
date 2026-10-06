@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- Rebalanced color using the UT Brand Center palette: burnt orange now marks course identity
+  and the main data lines; Dark Teal (Cyan in dark mode) carries data values, selections,
+  and heatmap/calendar shading; Blue Gray is the neutral. Replaced the non-UT blue.
+- Main page: the course is now the page heading; the reporting window moved to the header;
+  a "Sessions by lecture" strip shows interest across the semester; totals sit beside the
+  semester's other courses; the course comparison appears only with two or more courses;
+  definitions moved behind an info hint. Wording is now "Typical watch time" and
+  "Watched nearly all" everywhere.
+- Lecture library: lectures are numbered ("Lecture 4") instead of repeating raw titles;
+  every column sorts; sessions have inline bars and watch time shows its share of length.
+- Lecture report: removed tiles and insights that repeated the charts; the Audience panel
+  folds a single device into a sentence; smallest text raised to 11px.
 - Added a calendar view to the lecture library, with month navigation and a hover/focus
   tooltip on each day showing the lectures' sessions, median watch time, and completion.
 - Tooltips use dedicated light/dark colors instead of inverting the page, with orange values,

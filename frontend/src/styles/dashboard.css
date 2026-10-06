@@ -34,7 +34,7 @@ aside {
   background: var(--panel);
 }
 .eyebrow {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
   color: var(--muted);
@@ -117,7 +117,7 @@ aside select {
 .course-link small {
   font-weight: 400;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
 }
 .course-link.active {
   background: var(--soft);
@@ -188,14 +188,14 @@ h2 {
   color: var(--muted);
 }
 .metric strong {
-  color: var(--ink-course);
+  color: var(--ink-data);
   font-size: 28px;
   font-weight: 650;
   letter-spacing: -1px;
   margin: 8px 0;
 }
 .metric small {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .panel {
@@ -217,7 +217,7 @@ h2 {
   gap: 10px;
   margin: 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
 }
 .window-label select {
@@ -235,7 +235,7 @@ table {
 }
 thead {
   background: var(--soft);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 th,
@@ -268,7 +268,7 @@ td {
   margin: 0;
   padding: 14px 24px;
   border-top: 1px solid var(--line);
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .library-tools {
@@ -313,12 +313,12 @@ td {
   max-width: 310px;
 }
 .lecture-link strong {
-  color: var(--ink-course);
+  color: var(--fg);
   font-weight: 600;
   font-size: 12px;
 }
 .lecture-link span span {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -326,7 +326,7 @@ td {
   overflow: hidden;
 }
 .lecture-link small {
-  font-size: 10px;
+  font-size: 11px;
 }
 .lecture-link:hover strong {
   text-decoration: underline;
@@ -337,7 +337,7 @@ td {
   color: var(--muted);
 }
 .footnote {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
   line-height: 1.8;
   max-width: 850px;
@@ -374,7 +374,7 @@ dialog::backdrop {
   max-width: 800px;
 }
 .detail-heading .eyebrow {
-  font-size: 10px;
+  font-size: 11px;
 }
 .chart-tooltip {
   z-index: 5;
@@ -480,7 +480,7 @@ dialog::backdrop {
     padding: 0 18px 16px;
   }
   .window-label {
-    font-size: 9px;
+    font-size: 11px;
   }
   .window-label select {
     max-width: 145px;
@@ -495,7 +495,7 @@ dialog::backdrop {
     min-width: 190px;
   }
   .metric small {
-    font-size: 9px;
+    font-size: 11px;
   }
 }
 [hidden] {
@@ -511,7 +511,7 @@ dialog::backdrop {
 .instructor-profile strong {
   display: block;
   color: var(--ink-person);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 650;
 }
 .instructor-profile span {
@@ -546,7 +546,8 @@ dialog::backdrop {
   text-decoration: underline;
 }
 
-.course-heading .eyebrow {
+.course-heading .eyebrow,
+#courseHeading .eyebrow {
   color: var(--ink-course);
 }
 .person {
@@ -639,7 +640,7 @@ dialog::backdrop {
   border-radius: 6px;
   background: color-mix(
     in srgb,
-    var(--chart-1) calc(12% + var(--level) * 28%),
+    var(--heat) calc(12% + var(--level) * 28%),
     var(--panel)
   );
   color: var(--fg);
@@ -649,22 +650,22 @@ dialog::backdrop {
   margin-top: 4px;
 }
 .cal-lecture:hover {
-  border-color: var(--ink-course);
+  border-color: var(--ink-data);
 }
 .cal-lecture.none {
   background: var(--soft);
 }
 .cal-time {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .cal-lecture strong {
-  color: var(--ink-course);
+  color: var(--fg);
   font-size: 16px;
   font-variant-numeric: tabular-nums;
 }
 .cal-lecture small {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted);
 }
 .cal-undated {
@@ -764,5 +765,140 @@ dialog::backdrop {
   text-align: right;
 }
 .cal-grid td[data-day]:hover {
-  border-color: var(--ink-course);
+  border-color: var(--ink-data);
+}
+
+.page-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.metrics-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 12px;
+}
+.metrics-head h2 {
+  font-size: 14px;
+  letter-spacing: 0;
+}
+.hint.wide p {
+  right: auto;
+  left: 0;
+  width: 320px;
+}
+.metric .bench {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-weight: 600;
+}
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+}
+.sort span {
+  opacity: 0.6;
+}
+.sort:hover {
+  text-decoration: underline;
+}
+th[aria-sort="ascending"] .sort,
+th[aria-sort="descending"] .sort {
+  color: var(--ink-data);
+}
+.lecture-table td small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+}
+.mini-bar {
+  display: block;
+  width: 72px;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: var(--soft);
+}
+.mini-bar b {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--heat);
+}
+.strip {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 120px;
+  padding: 0 24px;
+}
+.strip-bar {
+  display: flex;
+  flex: 1 1 0;
+  align-items: flex-end;
+  min-width: 4px;
+  max-width: 120px;
+  height: 100%;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.strip-bar i {
+  display: block;
+  width: 100%;
+  height: max(calc(var(--h) * 100%), 3px);
+  border-radius: 4px 4px 0 0;
+  background: var(--strip-base);
+}
+.strip-bar:hover i,
+.strip-bar:focus-visible i,
+.strip-bar.high i {
+  background: var(--chart-1);
+}
+.strip-bar.low i {
+  background: var(--chart-2);
+}
+.strip-bar.none i {
+  background: var(--soft);
+}
+.strip-bar.partial i {
+  opacity: 0.55;
+}
+.strip-axis {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 24px 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+.strip-note {
+  margin: 10px 24px 18px;
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .page-controls {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .strip,
+  .strip-axis {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .strip-note {
+    margin-left: 14px;
+    margin-right: 14px;
+  }
 }

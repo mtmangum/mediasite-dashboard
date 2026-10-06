@@ -44,23 +44,8 @@
       </aside>
       <main id="workspace">
         <div class="page-heading">
-          <div>
-            <p class="eyebrow" id="semesterLabel"></p>
-            <h1>Course overview</h1>
-            <p class="muted">
-              A clearer view of how your lectures are watched.
-            </p>
-          </div>
-          <button id="refresh" class="secondary">↻ Refresh</button>
-        </div>
-        <div id="status" role="status" aria-live="polite">Loading library…</div>
-        <section id="overview"></section>
-        <section class="panel comparison">
-          <div class="section-heading">
-            <div>
-              <h2>Course comparison</h2>
-              <p class="muted">Your courses in the selected semester</p>
-            </div>
+          <div id="courseHeading"></div>
+          <div class="page-controls">
             <label class="window-label" for="window"
               >Reporting window<select id="window">
                 <option value="all">All time</option>
@@ -68,6 +53,30 @@
                 <option value="last30">Last 30 days</option>
               </select></label
             >
+            <button id="refresh" class="secondary">↻ Refresh</button>
+          </div>
+        </div>
+        <div id="status" role="status" aria-live="polite">Loading library…</div>
+        <div class="metrics-head">
+          <h2>Course totals · <span id="windowName">All time</span></h2>
+          <details class="hint wide">
+            <summary aria-label="About these numbers">ⓘ</summary>
+            <p>
+              Sessions are anonymous viewing visits, not student counts or
+              attendance. Typical watch time is the median among sessions with
+              watch time. Watched nearly all is the share of watched sessions
+              that covered at least 85% of the recording. Viewing is not proof
+              of learning.
+            </p>
+          </details>
+        </div>
+        <section id="overview"></section>
+        <section class="panel comparison">
+          <div class="section-heading">
+            <div>
+              <h2>Course comparison</h2>
+              <p class="muted">Your courses in the selected semester</p>
+            </div>
           </div>
           <div id="comparison"></div>
         </section>
@@ -98,10 +107,8 @@
           <div id="lectures"></div>
         </section>
         <p class="footnote">
-          Sessions are anonymous viewing visits, not student counts or
-          attendance. Completion means at least 85% recorded coverage among
-          watched sessions with known coverage. Viewing is not proof of
-          learning.
+          Sessions are anonymous viewing visits, not student counts, attendance,
+          or evidence of learning.
         </p>
       </main>
     </div>

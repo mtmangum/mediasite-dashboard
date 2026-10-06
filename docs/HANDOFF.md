@@ -20,7 +20,7 @@ Do not push it to the old app's remotes or change the old app unless requested.
 
 - Local, read-only instructor workspace for a course and semester.
 - Single-instructor workspace with semester/course selection, chronological lecture list, course comparisons,
-  sessions, median watch time, and coverage-based completion.
+  sessions, typical (median) watch time, and "watched nearly all" (coverage-based completion).
 - Reporting windows: all time, first seven days after release, last thirty days.
 - Selected lecture opens detailed all-time charts using the existing chart renderer.
 - Anonymous sessions are not student identities, attendance, or proof of learning.
@@ -28,6 +28,15 @@ Do not push it to the old app's remotes or change the old app unless requested.
 - Live mode should load full history through API pagination, beyond the old 100-item limit.
 - Start in sample-data mode, without copying the original app's credentials.
 - User prefers concise documentation and readable interfaces.
+- Colors follow the UT Brand Center palette (https://umac.utexas.edu/brand-center/colors/):
+  burnt orange for course identity, the header, and the main data lines (engagement,
+  retention, views by day); Dark Teal (Cyan in dark mode) for data values, selections,
+  heatmap/calendar shading, and secondary series; Blue Gray as the neutral. Brand rules:
+  secondary colors sparingly, never tints of burnt orange (the chart area washes are the one
+  exception), no reds or purples. Official green fails as text contrast; keep #386a28 for text.
+- Show each fact once, in the same words everywhere: "Typical watch time" and "Watched nearly all".
+  Lectures are "Lecture N" by date; raw recording titles appear only when they add to the course.
+  The reporting window lives in the page header; the comparison table shows only with 2+ courses.
 - Keep the sidebar minimal: profile (name, recording count), semester only when several,
   courses. No avatar (the name is inferred, not a login identity). Show each fact once.
 - No instructor selector: each dashboard is an instructor workspace. Display a name

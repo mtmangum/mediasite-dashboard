@@ -31,14 +31,17 @@ Credentials stay in `.env` and on the Node server. They are not copied from the 
 ## Use the dashboard
 
 - Select a **course** in your workspace (and a **semester**, when there is more than one). Lectures appear in chronological order.
-- Compare **All time**, **First 7 days**, or **Last 30 days** viewing activity.
+- Choose **All time**, **First 7 days**, or **Last 30 days** in the page header. Totals show
+  each figure beside the semester's other courses, and **Sessions by lecture** shows where
+  interest rises and falls across the semester.
 - Select a lecture for its full **all-time** engagement, retention, and audience charts.
 - In a lecture report, click the engagement chart (or a most-replayed moment) to see that
   point in the recording. Live data opens the Mediasite player there on request; the sample
   demo shows the nearest sample frame.
 - Use **Refresh** to reload the library and reports; **Retry reports** retries unavailable analytics.
+- Sort the lecture list by any column. Lectures are numbered by recording date.
 - Switch the lecture library between a **List** and a month **Calendar**; hover a day for each
-  lecture's sessions, median watch time, and completion.
+  lecture's sessions, typical watch time, and share who watched nearly all.
 - Search lecture titles or descriptions, or export the selected course's metrics as CSV.
 
 Course grouping uses the parsed course/section/instructor in recording titles and
@@ -52,7 +55,7 @@ presenting an incomplete library as complete. Report failures show unavailable v
 not zero activity. Newer lectures show when their first seven days are incomplete.
 
 Session counts are not student counts, and viewing is not evidence of learning or
-attendance. Completion means at least 85% recorded coverage among watched sessions
+attendance. "Watched nearly all" means at least 85% recorded coverage among watched sessions
 with known coverage. Course totals exclude reports whose session data is unavailable.
 The comparison window applies to overview metrics; detailed charts are labeled all-time.
 

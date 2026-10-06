@@ -6,6 +6,13 @@ import { element, errorMessage } from "./shared";
 import type { Presentation, ViewingCharts } from "./shared";
 import { fetchJson } from "./http";
 import { dayKeyFor, monthKey, monthsFor, renderCalendar } from "./calendar";
+import {
+  lectureDay,
+  lectureDetail,
+  lectureNumber,
+  sortItems,
+  type SortKey,
+} from "./lecture-label";
 import { demoLibrary, demoResponse } from "./demo-api";
 import { esc, fmtDuration, fmtSpan } from "./format";
 import {
@@ -29,8 +36,8 @@ try {
   // The view still switches when browser storage is unavailable.
 }
 let calMonth = "";
-const calendarTips = new Map<string, string>();
-let calendarFoot = "";
+let sortKey: SortKey = "date";
+let sortDir: 1 | -1 = 1;
 let multiInstructor = false;
 let courses: Course[] = [],
   selected = "",
@@ -123,51 +130,84 @@ function lectureNote(item: Presentation, m: ReturnType<typeof lectureMetrics>) {
             ? "First week in progress"
             : "";
 }
-function listView(items: Presentation[]) {
-  return `<div class="table-scroll"><table class="lecture-table"><thead><tr><th scope="col">Lecture</th><th scope="col">Length</th><th scope="col">Sessions</th><th scope="col">Median watch</th><th scope="col">Completion</th></tr></thead><tbody>${items
+const metricsOf = (item: Presentation) =>
+  lectureMetrics(item, reports.get(item.id), windowValue(), now);
+const courseOf = (id: string) =>
+  courses.find((c) => c.items.some((i) => i.id === id));
+// "Lecture 3", plus the recording's own title when it says something the course does not.
+function lectureName(course: Course, item: Presentation) {
+  const detail = lectureDetail(item);
+  return `Lecture ${lectureNumber(course, item.id)}${detail ? ` · ${detail}` : ""}`;
+}
+const sortValue = (item: Presentation, key: SortKey, m = metricsOf(item)) =>
+  key === "date"
+    ? recordingDate(item)
+    : key === "length"
+      ? (item.durationMs ?? null)
+      : key === "sessions"
+        ? (m?.total ?? null)
+        : key === "median"
+          ? (m?.medianWatched ?? null)
+          : (m?.completionRate ?? null);
+const COLUMNS: [SortKey, string][] = [
+  ["date", "Lecture"],
+  ["length", "Length"],
+  ["sessions", "Sessions"],
+  ["median", "Typical watch"],
+  ["completion", "Watched nearly all"],
+];
+function listView(course: Course, items: Presentation[]) {
+  const measured = new Map(items.map((i) => [i.id, metricsOf(i)]));
+  const sorted = sortItems(items, sortDir, (i) =>
+    sortValue(i, sortKey, measured.get(i.id)),
+  );
+  const most = Math.max(
+    0,
+    ...course.items.map((i) => metricsOf(i)?.total ?? 0),
+  );
+  return `<div class="table-scroll"><table class="lecture-table"><thead><tr>${COLUMNS.map(
+    ([key, label]) =>
+      `<th scope="col" aria-sort="${key === sortKey ? (sortDir === 1 ? "ascending" : "descending") : "none"}"><button type="button" class="sort" data-sort="${key}">${label}<span aria-hidden="true">${key === sortKey ? (sortDir === 1 ? "↑" : "↓") : "↕"}</span></button></th>`,
+  ).join("")}</tr></thead><tbody>${sorted
     .map((item) => {
-      const m = lectureMetrics(item, reports.get(item.id), windowValue(), now);
+      const m = measured.get(item.id) ?? null;
       const note = lectureNote(item, m);
-      return `<tr><th scope="row"><button class="lecture-link" data-lecture="${esc(item.id)}">${item.thumbnail ? `<img src="${esc(item.thumbnail)}" alt="" loading="lazy">` : '<span class="thumbnail-placeholder">▶</span>'}<span><strong>${esc(date(item))}</strong><span>${esc(item.title || "Untitled")}</span>${note ? `<small class="${failures.has(item.id) ? "bad" : "muted"}">${esc(note)}</small>` : ""}</span></button></th><td>${fmtDuration(item.durationMs)}</td><td>${number(m?.total ?? null)}</td><td>${span(m?.medianWatched ?? null)}</td><td>${percent(m?.completionRate ?? null)}</td></tr>`;
+      const length = (item.durationMs || 0) / 1000;
+      const share =
+        m?.medianWatched != null && length > 0
+          ? `<small class="muted">${percent(Math.min(1, m.medianWatched / length))} of length</small>`
+          : "";
+      return `<tr><th scope="row"><button class="lecture-link" data-lecture="${esc(item.id)}">${item.thumbnail ? `<img src="${esc(item.thumbnail)}" alt="" loading="lazy">` : '<span class="thumbnail-placeholder">▶</span>'}<span><strong>${esc(lectureName(course, item))}</strong><span>${esc(lectureDay(item))}</span>${note ? `<small class="${failures.has(item.id) ? "bad" : "muted"}">${esc(note)}</small>` : ""}</span></button></th><td>${fmtDuration(item.durationMs)}</td><td><span>${number(m?.total ?? null)}</span>${m && most ? `<i class="mini-bar" aria-hidden="true"><b style="width:${Math.round((m.total / most) * 100)}%"></b></i>` : ""}</td><td><span>${span(m?.medianWatched ?? null)}</span>${share}</td><td>${percent(m?.completionRate ?? null)}</td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }
-function calendarView(items: Presentation[]) {
+// One lecture's figures, for the tooltips on calendar days and strip bars.
+function lectureTip(course: Course, item: Presentation) {
+  const m = metricsOf(item);
+  const note = lectureNote(item, m);
+  const at = recordingDate(item);
+  const row = (label: string, value: string) =>
+    `<dt>${label}</dt><dd>${esc(value)}</dd>`;
+  const time =
+    at === null
+      ? ""
+      : `${new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · `;
+  return `<div class="cal-tip-item"><strong>${esc(lectureName(course, item))}</strong><span>${esc(time + fmtDuration(item.durationMs))}</span>${
+    m
+      ? `<dl>${row("Sessions", number(m.total))}${row("Typical watch", span(m.medianWatched))}${row("Watched nearly all", percent(m.completionRate))}</dl>`
+      : ""
+  }${note ? `<em>${esc(note)}</em>` : ""}</div>`;
+}
+function calendarView(course: Course, items: Presentation[]) {
   const months = monthsFor(items);
+  if (!months.length) return listView(course, items);
   if (!months.includes(calMonth)) {
     // Open on the latest month with a lecture so far, else the first.
     const thisMonth = monthKey(now);
     calMonth = months.filter((m) => m <= thisMonth).pop() ?? months[0] ?? "";
   }
-  const metrics = new Map(
-    items.map((i) => [
-      i.id,
-      lectureMetrics(i, reports.get(i.id), windowValue(), now),
-    ]),
-  );
+  const metrics = new Map(items.map((i) => [i.id, metricsOf(i)]));
   const most = Math.max(0, ...[...metrics.values()].map((m) => m?.total ?? 0));
-  if (!months.length) return listView(items);
-  calendarTips.clear();
-  const windowName = windowSelect.selectedOptions[0]?.text ?? "";
-  for (const item of items) {
-    const at = recordingDate(item);
-    if (at === null) continue;
-    const m = metrics.get(item.id) ?? null;
-    const note = lectureNote(item, m);
-    const row = (label: string, value: string) =>
-      `<dt>${label}</dt><dd>${esc(value)}</dd>`;
-    const key = dayKeyFor(at);
-    calendarTips.set(
-      key,
-      (calendarTips.get(key) ?? "") +
-        `<div class="cal-tip-item"><strong>${esc(item.title || "Untitled")}</strong><span>${esc(new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }))} · ${esc(fmtDuration(item.durationMs))}</span>${
-          m
-            ? `<dl>${row("Sessions", number(m.total))}${row("Median watch", span(m.medianWatched))}${row("Completion", percent(m.completionRate))}</dl>`
-            : ""
-        }${note ? `<em>${esc(note)}</em>` : ""}</div>`,
-    );
-  }
-  calendarFoot = `${windowName} · Select a lecture to open its report`;
   return renderCalendar(items, calMonth, months, (item) => {
     const m = metrics.get(item.id) ?? null;
     if (!m)
@@ -183,13 +223,108 @@ function calendarView(items: Presentation[]) {
     };
   });
 }
+// Sessions for every lecture in order, so a drop in interest shows at a glance.
+function lectureStrip(course: Course) {
+  const rows = course.items.map((item) => ({ item, m: metricsOf(item) }));
+  const totals = rows.flatMap((r) => (r.m ? [r.m.total] : []));
+  if (rows.length < 3 || !totals.length) return "";
+  const max = Math.max(...totals),
+    min = Math.min(...totals);
+  const spread = max !== min;
+  const first = rows.find((r) => r.m?.total === max)!;
+  const last = rows.find((r) => r.m?.total === min)!;
+  const average = totals.reduce((a, b) => a + b, 0) / totals.length;
+  const bars = rows
+    .map(({ item, m }) => {
+      const partial =
+        m && windowValue() === "first7" && firstWeekIncomplete(item, now);
+      const cls = !m
+        ? " none"
+        : spread && m.total === max
+          ? " high"
+          : spread && m.total === min
+            ? " low"
+            : "";
+      const label = `${lectureName(course, item)}, ${lectureDay(item)}: ${m ? `${m.total.toLocaleString()} sessions${partial ? " (first week in progress)" : ""}` : "report unavailable"}`;
+      return `<button type="button" class="strip-bar${cls}${partial ? " partial" : ""}" data-lecture="${esc(item.id)}" data-strip="${esc(item.id)}" style="--h:${m && max ? (m.total / max).toFixed(3) : 0}" aria-label="${esc(label)}"><i></i></button>`;
+    })
+    .join("");
+  const name = (r: (typeof rows)[number]) =>
+    `${lectureName(course, r.item).split(" · ")[0]} (${number(r.m!.total)})`;
+  return `<section class="panel strip-panel"><div class="section-heading"><div><h2>Sessions by lecture</h2><p class="muted">One bar per lecture, in date order. Select a bar to open its report.</p></div></div><div class="strip" role="group" aria-label="Sessions by lecture">${bars}</div><div class="strip-axis" aria-hidden="true"><span>${esc(
+    lectureDay(rows[0].item)
+      .replace(/^\w+, /, "")
+      .replace(/, \d{4}$/, ""),
+  )}</span><span>${esc(
+    lectureDay(rows[rows.length - 1].item)
+      .replace(/^\w+, /, "")
+      .replace(/, \d{4}$/, ""),
+  )}</span></div><p class="strip-note muted">${spread ? `Most watched ${esc(name(first))} · Least watched ${esc(name(last))} · ` : ""}Average ${number(Math.round(average))} per lecture</p></section>`;
+}
+// Totals, each set beside the same figure for the semester's other courses.
+function metricTiles(course: Course, list: Course[]) {
+  const m = courseMetrics(course, reports, windowValue(), now);
+  const others = list.filter((c) => c.key !== course.key);
+  const pooled = others.length
+    ? courseMetrics(
+        { ...course, items: others.flatMap((c) => c.items) },
+        reports,
+        windowValue(),
+        now,
+      )
+    : null;
+  const label = others.length === 1 ? others[0].code : "Other courses";
+  const perLecture = (x: { sessions: number | null; available: number }) =>
+    x.sessions !== null && x.available
+      ? Math.round(x.sessions / x.available)
+      : null;
+  const bench = (value: string | null) =>
+    value === null
+      ? ""
+      : `<small class="bench">${esc(label)}: ${esc(value)}</small>`;
+  const own = perLecture(m);
+  const other = pooled ? perLecture(pooled) : null;
+  const tiles: [string, string, string, string][] = [
+    [
+      "Sessions",
+      number(m.sessions),
+      `Anonymous visits${own === null ? "" : ` · ${number(own)} per lecture`}`,
+      bench(other === null ? null : `${number(other)} per lecture`),
+    ],
+    [
+      "Typical watch time",
+      span(m.median),
+      "Median among sessions with watch time",
+      bench(pooled?.median == null ? null : span(pooled.median)),
+    ],
+    [
+      "Watched nearly all",
+      percent(m.completion),
+      "Sessions covering 85%+ of the recording",
+      bench(pooled?.completion == null ? null : percent(pooled.completion)),
+    ],
+  ];
+  return `<div class="metrics">${tiles
+    .map(
+      ([name, value, note, extra]) =>
+        `<div class="metric"><span>${name}</span><strong>${value}</strong><small>${note}</small>${extra}</div>`,
+    )
+    .join("")}</div>${
+    !busy && m.available < course.items.length
+      ? `<p class="metrics-note muted">Totals exclude ${course.items.length - m.available} of ${course.items.length} recordings whose reports are unavailable.</p>`
+      : ""
+  }`;
+}
 function render() {
-  hideCalTip();
+  hideTip();
   const list = visible();
   if (!list.some((c) => c.key === selected)) selected = list[0]?.key || "";
   const course = current();
   element("courseCount").textContent = String(list.length);
-  element("semesterLabel").textContent = term.value.toUpperCase();
+  element("windowName").textContent = windowSelect.selectedOptions[0].text;
+  element("courseHeading").innerHTML = course
+    ? `<p class="eyebrow">${esc(term.value.toUpperCase())} · ${esc(course.code)}${course.section ? ` · SECTION ${esc(course.section)}` : ""}</p><h1>${esc(course.title)}</h1><p class="muted">${[multiInstructor && `<span class="person">${esc(course.instructor)}</span>`, dateRange(course)].filter(Boolean).join(" · ")}</p>`
+    : "<h1>Your courses</h1>";
   element("courses").innerHTML = list
     .map(
       (c) =>
@@ -197,30 +332,12 @@ function render() {
     )
     .join("");
   element("overview").innerHTML = course
-    ? (() => {
-        const m = courseMetrics(course, reports, windowValue(), now);
-        return `<div class="course-heading"><div><span class="eyebrow">${esc(course.code)}${course.section ? ` · SECTION ${esc(course.section)}` : ""}</span><h2>${esc(course.title)}</h2><p class="muted">${[multiInstructor && `<span class="person">${esc(course.instructor)}</span>`, dateRange(course)].filter(Boolean).join(" · ")}</p></div></div><div class="metrics">${[
-          ["Sessions", number(m.sessions), "Anonymous viewing visits"],
-          [
-            "Median watch time",
-            span(m.median),
-            "Among sessions with watch time",
-          ],
-          ["Completion", percent(m.completion), "85% coverage of a recording"],
-        ]
-          .map(
-            ([label, value, note]) =>
-              `<div class="metric"><span>${label}</span><strong>${value}</strong><small>${note}</small></div>`,
-          )
-          .join("")}</div>${
-          !busy && m.available < course.items.length
-            ? `<p class="metrics-note muted">Totals exclude ${course.items.length - m.available} of ${course.items.length} recordings whose reports are unavailable.</p>`
-            : ""
-        }`;
-      })()
+    ? metricTiles(course, list) + lectureStrip(course)
     : '<p class="empty">No courses available for this selection.</p>';
+  // A table of one course would only repeat the totals above.
+  document.querySelector<HTMLElement>(".comparison")!.hidden = list.length < 2;
   element("comparison").innerHTML =
-    `<div class="table-scroll"><table><thead><tr><th scope="col">Course</th><th scope="col">Sessions</th><th scope="col">Median watch</th><th scope="col">Completion</th></tr></thead><tbody>${list
+    `<div class="table-scroll"><table><thead><tr><th scope="col">Course</th><th scope="col">Sessions</th><th scope="col">Typical watch</th><th scope="col">Watched nearly all</th></tr></thead><tbody>${list
       .map((c) => {
         const m = courseMetrics(c, reports, windowValue(), now);
         return `<tr><th scope="row"><button class="table-course" data-course="${esc(c.key)}">${esc(c.code)}${c.section ? ` · ${esc(c.section)}` : ""}</button></th><td>${number(m.sessions)}</td><td>${span(m.median)}</td><td>${percent(m.completion)}</td></tr>`;
@@ -229,18 +346,28 @@ function render() {
         "",
       )}</tbody></table></div><p class="table-note">${windowValue() === "first7" ? "Seven days from each release date; newer lectures have an incomplete window. Missing release dates are excluded." : windowValue() === "last30" ? "Sessions opened in the rolling 30 days through this refresh." : "All recorded session history through this refresh."} Unavailable reports are excluded from course totals.</p>`;
   const items = filteredItems();
+  const sortName = COLUMNS.find(([k]) => k === sortKey)![1].toLowerCase();
   element("lectureCount").textContent =
-    `${items.length} of ${course?.items.length || 0} recordings${view === "list" ? " · earliest first" : ""}`;
+    `${items.length} of ${course?.items.length || 0} recordings${
+      view !== "list"
+        ? ""
+        : sortKey === "date" && sortDir === 1
+          ? " · earliest first"
+          : sortKey === "date"
+            ? " · latest first"
+            : ` · by ${sortName}, ${sortDir === 1 ? "low to high" : "high to low"}`
+    }`;
   document
     .querySelectorAll<HTMLElement>("[data-view]")
     .forEach((b) =>
       b.setAttribute("aria-pressed", String(b.dataset.view === view)),
     );
-  element("lectures").innerHTML = !items.length
-    ? '<p class="empty">No lectures match your selection.</p>'
-    : view === "calendar"
-      ? calendarView(items)
-      : listView(items);
+  element("lectures").innerHTML =
+    !items.length || !course
+      ? '<p class="empty">No lectures match your selection.</p>'
+      : view === "calendar"
+        ? calendarView(course, items)
+        : listView(course, items);
   element<HTMLButtonElement>("retry").hidden =
     !failures.size && ![...reports.values()].some((r) => r.sessions === null);
   element<HTMLButtonElement>("export").disabled = !course || busy;
@@ -320,7 +447,7 @@ async function load(fresh = false) {
         : "Read-only reports from your Mediasite account.";
     await loadReports(items, fresh);
     element("status").textContent =
-      `${items.length} recordings loaded${failures.size ? ` · ${failures.size} reports unavailable` : ""} · Updated ${new Date(now).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+      `Updated ${new Date(now).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}${failures.size ? ` · ${failures.size} reports unavailable` : ""}`;
   } catch (error) {
     element("status").textContent =
       `Unable to load the dashboard: ${errorMessage(error)}. Use Refresh to retry.`;
@@ -330,11 +457,13 @@ async function load(fresh = false) {
   }
 }
 function openDetail(id: string) {
-  const item = courses.flatMap((c) => c.items).find((i) => i.id === id);
-  if (!item) return;
-  element("detailTitle").textContent = date(item);
+  const course = courseOf(id);
+  const item = course?.items.find((i) => i.id === id);
+  if (!course || !item) return;
+  element("detailTitle").textContent =
+    `${lectureName(course, item)} · ${lectureDay(item)}`;
   element("detailMeta").textContent =
-    `${item.title || "Untitled"} · ${fmtDuration(item.durationMs)}`;
+    `${course.code}${course.section ? ` · Section ${course.section}` : ""} · ${course.title} · ${fmtDuration(item.durationMs)}`;
   const data = reports.get(id);
   if (data)
     renderViewingCharts(
@@ -355,7 +484,7 @@ function openDetail(id: string) {
 }
 document.addEventListener("click", (event) => {
   const target = (event.target as HTMLElement).closest<HTMLElement>(
-    "[data-course],[data-lecture],[data-view],[data-month]",
+    "[data-course],[data-lecture],[data-view],[data-month],[data-sort]",
   );
   if (target?.dataset.course) {
     selected = target.dataset.course;
@@ -370,33 +499,62 @@ document.addEventListener("click", (event) => {
     } catch {}
     render();
   }
+  if (target?.dataset.sort) {
+    const key = target.dataset.sort as SortKey;
+    if (key === sortKey) sortDir = sortDir === 1 ? -1 : 1;
+    else {
+      sortKey = key;
+      sortDir = key === "date" ? 1 : -1;
+    }
+    render();
+  }
   if (target?.dataset.month) {
     calMonth = target.dataset.month;
     render();
   }
   if (target?.dataset.lecture) openDetail(target.dataset.lecture);
 });
-// A tooltip for calendar days: every lecture that day with its figures, shown on hover or focus.
-const calTip = document.createElement("div");
-calTip.className = "cal-tip";
-calTip.id = "calTip";
-calTip.setAttribute("role", "tooltip");
-calTip.hidden = true;
-document.body.append(calTip);
-function showCalTip(day: HTMLElement) {
-  const html = calendarTips.get(day.dataset.day || "");
-  if (!html) return hideCalTip();
-  const [year, month, d] = (day.dataset.day || "").split("-").map(Number);
-  const heading = new Date(year, month - 1, d).toLocaleDateString([], {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
+// One tooltip for calendar days and strip bars: the lectures' figures, on hover or focus.
+const tip = document.createElement("div");
+tip.className = "cal-tip";
+tip.id = "calTip";
+tip.setAttribute("role", "tooltip");
+tip.hidden = true;
+document.body.append(tip);
+function tipContent(anchor: HTMLElement) {
+  const course = current();
+  if (!course) return null;
+  const foot = `${windowSelect.selectedOptions[0].text} · Select to open the report`;
+  if (anchor.dataset.strip) {
+    const item = course.items.find((i) => i.id === anchor.dataset.strip);
+    return item
+      ? {
+          heading: lectureDay(item, true),
+          html: lectureTip(course, item),
+          foot,
+        }
+      : null;
+  }
+  const key = anchor.dataset.day || "";
+  const here = course.items.filter((i) => {
+    const at = recordingDate(i);
+    return at !== null && dayKeyFor(at) === key;
   });
-  calTip.innerHTML = `<div class="cal-tip-head">${esc(heading)}</div>${html}<div class="cal-tip-foot">${esc(calendarFoot)}</div>`;
-  calTip.hidden = false;
-  const box = day.getBoundingClientRect();
-  const width = calTip.offsetWidth,
-    height = calTip.offsetHeight;
+  if (!here.length) return null;
+  return {
+    heading: lectureDay(here[0], true),
+    html: here.map((i) => lectureTip(course, i)).join(""),
+    foot,
+  };
+}
+function showTip(anchor: HTMLElement) {
+  const content = tipContent(anchor);
+  if (!content) return hideTip();
+  tip.innerHTML = `<div class="cal-tip-head">${esc(content.heading)}</div>${content.html}<div class="cal-tip-foot">${esc(content.foot)}</div>`;
+  tip.hidden = false;
+  const box = anchor.getBoundingClientRect();
+  const width = tip.offsetWidth,
+    height = tip.offsetHeight;
   const left = Math.max(
     8,
     Math.min(
@@ -405,30 +563,35 @@ function showCalTip(day: HTMLElement) {
     ),
   );
   const top = box.top - height - 8 >= 8 ? box.top - height - 8 : box.bottom + 8;
-  calTip.style.transform = `translate(${left}px, ${top}px)`;
-  day
-    .querySelectorAll(".cal-lecture")
-    .forEach((b) => b.setAttribute("aria-describedby", "calTip"));
+  tip.style.transform = `translate(${left}px, ${top}px)`;
+  (anchor.matches("button")
+    ? [anchor]
+    : [...anchor.querySelectorAll("button")]
+  ).forEach((b) => b.setAttribute("aria-describedby", "calTip"));
 }
-function hideCalTip() {
-  calTip.hidden = true;
+function hideTip() {
+  tip.hidden = true;
 }
-const calDay = (event: Event) =>
-  (event.target as HTMLElement).closest<HTMLElement>("td[data-day]");
-element("lectures").addEventListener("pointerover", (event) => {
-  const day = calDay(event);
-  if (day) showCalTip(day);
-  else hideCalTip();
-});
-element("lectures").addEventListener("pointerleave", hideCalTip);
-element("lectures").addEventListener("focusin", (event) => {
-  const day = calDay(event);
-  if (day) showCalTip(day);
-});
-element("lectures").addEventListener("focusout", hideCalTip);
-window.addEventListener("scroll", hideCalTip, true);
+const tipAnchor = (event: Event) =>
+  (event.target as HTMLElement).closest<HTMLElement>(
+    "td[data-day], .strip-bar",
+  );
+for (const area of [element("lectures"), element("overview")]) {
+  area.addEventListener("pointerover", (event) => {
+    const anchor = tipAnchor(event);
+    if (anchor) showTip(anchor);
+    else hideTip();
+  });
+  area.addEventListener("pointerleave", hideTip);
+  area.addEventListener("focusin", (event) => {
+    const anchor = tipAnchor(event);
+    if (anchor) showTip(anchor);
+  });
+  area.addEventListener("focusout", hideTip);
+}
+window.addEventListener("scroll", hideTip, true);
 document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") hideCalTip();
+  if (event.key === "Escape") hideTip();
 });
 term.addEventListener("change", render);
 windowSelect.addEventListener("change", render);
@@ -459,10 +622,11 @@ element("export").addEventListener("click", () => {
       "Semester",
       "Window",
       "Lecture",
+      "Title",
       "Date",
       "Sessions",
-      "Median watch seconds",
-      "Completion rate",
+      "Typical watch seconds",
+      "Watched nearly all rate",
       "Report status",
     ],
   ];
@@ -474,6 +638,7 @@ element("export").addEventListener("click", () => {
       course.instructor,
       course.semester,
       windowSelect.selectedOptions[0].text,
+      lectureNumber(course, item.id),
       item.title,
       date(item),
       m?.total,

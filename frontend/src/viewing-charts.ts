@@ -21,6 +21,7 @@ import {
 // Most-replayed moments are listed at least this far apart.
 const MOMENT_BUFFER_SECONDS = 120;
 const MOMENTS_SHOWN = 8;
+const INSIGHTS_SHOWN = 5;
 const count = (value: number) => value.toLocaleString();
 const pct = (share: number) => `${Math.round(share * 100)}%`;
 const plural = (n: number, one: string, many = `${one}s`) =>
@@ -75,7 +76,7 @@ function plot(
   const yLabels = options.yLabels || [count(max), count(max / 2), "0"];
   return `<div class="chart-plot"><div class="chart-y-axis" aria-hidden="true">${yLabels.map((l) => `<span>${esc(l)}</span>`).join("")}</div>
     <div class="plot-area"><svg data-plot="${kind}" viewBox="0 0 600 180" preserveAspectRatio="none" role="img" aria-label="${esc(title)}" ${options.focusable ? 'tabindex="0"' : ""}><desc>${esc(description)}</desc><path class="chart-grid" d="M0 8H600 M0 92H600 M0 176H600"/>${marks}</svg>${options.overlay || ""}</div>
-    </div><div class="chart-x-axis" aria-hidden="true">${labels.map(({ fraction, label }) => `<span style="left:${fraction * 100}%" class="${fraction === 0 ? "axis-start" : fraction === 1 ? "axis-end" : ""}">${esc(label)}</span>`).join("")}</div><div class="chart-axis-label muted">${esc(axis)}</div>`;
+    </div><div class="chart-x-axis" aria-hidden="true">${labels.map(({ fraction, label }) => `<span style="left:${fraction * 100}%" class="${fraction === 0 ? "axis-start" : fraction === 1 ? "axis-end" : ""}">${esc(label)}</span>`).join("")}</div>${axis ? `<div class="chart-axis-label muted">${esc(axis)}</div>` : ""}`;
 }
 
 // A column with rounded top corners, sitting on the zero baseline.
@@ -237,7 +238,7 @@ function daysPanel(sessions: SessionRecord[]) {
       max,
       marks,
       evenLabels(days.length, (i) => dayName(days[i].date)),
-      "Day",
+      "",
     ) +
       dataTable(
         "Sessions per day",
@@ -410,7 +411,10 @@ function audiencePanel(
   return panel(
     title,
     "Where sessions came from, and how many viewers returned.",
-    `<div class="device-bar" role="img" aria-label="Sessions by device">${segments}</div><ul class="device-legend">${legend}</ul>${returning}` +
+    (keys.length === 1
+      ? `<p class="device-single">All ${plural(sessions.length, "session")} were on ${{ desktop: "desktop", mobile: "a phone or tablet", other: "other devices" }[keys[0]]}.</p>`
+      : `<div class="device-bar" role="img" aria-label="Sessions by device">${segments}</div><ul class="device-legend">${legend}</ul>`) +
+      returning +
       dataTable(
         "Sessions by device",
         ["Device", "Sessions"],
@@ -436,10 +440,6 @@ export function renderViewingCharts(
   const all = sessions || [];
   const stats = sessionStats(all, end);
   const { days } = viewsByDay(all);
-  const busiestDay = days.reduce<(typeof days)[number] | null>(
-    (best, d) => (d.count > (best?.count ?? 0) ? d : best),
-    null,
-  );
   const heatmap = weekHourHeatmap(all);
   const devices = deviceCounts(all);
 
@@ -464,29 +464,6 @@ export function renderViewingCharts(
       stats.completionBase
         ? `${count(stats.completed)} of ${count(stats.completionBase)} watched sessions covered ${pct(COMPLETE_SHARE)}+ of the recording`
         : "Coverage not reported",
-    ),
-    tile(
-      "Viewers",
-      viewers ? count(viewers.distinct) : "—",
-      viewers
-        ? viewers.returning
-          ? `${count(viewers.returning)} came back · by network address`
-          : "By network address"
-        : "Viewer counts unavailable",
-    ),
-    tile(
-      "Busiest day",
-      busiestDay ? dayName(busiestDay.date) : "—",
-      busiestDay
-        ? `${plural(busiestDay.count, "session")} · ${pct(busiestDay.count / stats.total)} of all`
-        : "No sessions yet",
-    ),
-    tile(
-      "Most replayed",
-      peakSegment ? fmtClock(peakSegment.startSeconds) : "—",
-      peakSegment
-        ? `${plural(peakSegment.views, "view")} in ${peakSegment.durationSeconds}s`
-        : "No segment activity yet",
     ),
   ].join("");
 
@@ -514,19 +491,11 @@ export function renderViewingCharts(
     notes.push(
       `${pct(devices.mobile / all.length)} of sessions were on phones or tablets.`,
     );
-  if (all.length >= 5 && stats.zeroOpens / all.length >= 0.25)
-    notes.push(
-      `${pct(stats.zeroOpens / all.length)} of sessions opened the recording without watching any of it.`,
-    );
-  if (viewers && viewers.returning > 0)
-    notes.push(
-      `${count(viewers.returning)} of ${plural(viewers.distinct, "viewer")} returned for another session.`,
-    );
 
   container.innerHTML = `<div class="stat-grid">${tiles}</div>${
     notes.length
       ? `<ul class="insights" aria-label="What stands out">${notes
-          .slice(0, MOMENTS_SHOWN)
+          .slice(0, INSIGHTS_SHOWN)
           .map((n) => `<li>${esc(n)}</li>`)
           .join("")}</ul>`
       : ""
@@ -545,7 +514,7 @@ export function renderViewingCharts(
           state(data.histogramError || "Session data unavailable.", true),
           false,
         )
-  }${retentionPanel(data, sessions, stats.medianWatched)}${audiencePanel(sessions, viewers)}</div><p class="chart-caption muted">Updated ${esc(fmtTime(data.fetchedAt))} · Sessions are not unique viewers; viewers are counted by network address and no identities are shown. Day and hour charts use your browser's time zone. Timeline counts can differ because of reporting thresholds.</p>`;
+  }${retentionPanel(data, sessions, stats.medianWatched)}${audiencePanel(sessions, viewers)}</div><p class="chart-caption muted">Updated ${esc(fmtTime(data.fetchedAt))} · Sessions are not unique viewers, and no identities are shown. Timeline counts can differ because of reporting thresholds.</p>`;
 
   bindInteractions(
     container,
