@@ -254,8 +254,8 @@ function heatmapPanel(heatmap: Heatmap) {
         `<span class="hm-day">${esc(weekdayShort[day])}</span><div class="hm-row">${row
           .map((n, hour) =>
             n
-              ? `<i class="hm-cell" style="--level:${(0.18 + 0.82 * (n / heatmap.max)).toFixed(2)}" data-tip-value="${esc(plural(n, "session"))}" data-tip-label="${esc(`${weekdayShort[day]} ${hourName(hour)}–${hourName(hour + 1)}`)}"></i>`
-              : '<i class="hm-cell empty"></i>',
+              ? `<i class="hm-cell" style="--level:${(0.3 + 0.7 * Math.sqrt(n / heatmap.max)).toFixed(2)}" data-tip-value="${esc(plural(n, "session"))}" data-tip-label="${esc(`${weekdayShort[day]} ${hourName(hour)}–${hourName(hour + 1)}`)}"></i>`
+              : '<i class="hm-cell none"></i>',
           )
           .join("")}</div>`,
     )
@@ -267,7 +267,7 @@ function heatmapPanel(heatmap: Heatmap) {
     .slice(0, 12);
   return panel(
     "When people watch",
-    "Sessions by weekday and hour of day, in your time zone. Darker means more.",
+    "Sessions by weekday and hour of day, in your time zone. A stronger color means more.",
     `<div class="heatmap" role="img" aria-label="Sessions by weekday and hour; busiest ${esc(weekdayLong[heatmap.peak!.day])} ${esc(hourName(heatmap.peak!.hour))}"><span></span><div class="hm-hours">${hours}</div>${rows}</div><div class="hm-legend muted" aria-hidden="true"><span>Fewer</span><i></i><span>More</span></div>` +
       dataTable(
         "Busiest hours",

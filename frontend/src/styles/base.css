@@ -33,6 +33,8 @@
   --bad: #9a3412;
   --soft: #eeece6;
   --card-shadow: 0 6px 18px #00000010;
+  --ink-course: #a84b00;
+  --ink-person: #2a5d8f;
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
@@ -48,6 +50,8 @@
   --bad: #ffd600;
   --soft: var(--ut-charcoal);
   --card-shadow: 0 8px 22px #00000030;
+  --ink-course: #f8971f;
+  --ink-person: #8fb8e8;
   --thumb-start: var(--ut-charcoal);
   --thumb-end: #252e34;
 }

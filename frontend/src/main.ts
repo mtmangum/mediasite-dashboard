@@ -88,7 +88,7 @@ function render() {
   element("overview").innerHTML = course
     ? (() => {
         const m = courseMetrics(course, reports, windowValue(), now);
-        return `<div class="course-heading"><div><span class="eyebrow">${esc(course.code)}${course.section ? ` · SECTION ${esc(course.section)}` : ""}</span><h2>${esc(course.title)}</h2><p class="muted">${esc(course.instructor)} · ${esc(course.semester)}</p></div><span class="badge">${course.items.length} recordings</span></div><div class="metrics">${[
+        return `<div class="course-heading"><div><span class="eyebrow">${esc(course.code)}${course.section ? ` · SECTION ${esc(course.section)}` : ""}</span><h2>${esc(course.title)}</h2><p class="muted"><span class="person">${esc(course.instructor)}</span> · ${esc(course.semester)}</p></div><span class="badge">${course.items.length} recordings</span></div><div class="metrics">${[
           ["Sessions", number(m.sessions), "Anonymous viewing visits"],
           [
             "Median watch time",

@@ -242,7 +242,9 @@
 .heatmap {
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr);
-  gap: 3px 6px;
+  grid-auto-rows: min-content;
+  align-content: start;
+  gap: 4px 6px;
   margin-top: 14px;
   color: var(--muted);
   font-size: 10px;
@@ -251,7 +253,7 @@
 .hm-row {
   display: grid;
   grid-template-columns: repeat(24, minmax(0, 1fr));
-  gap: 2px;
+  gap: 3px;
 }
 .hm-hour {
   white-space: nowrap;
@@ -262,7 +264,7 @@
 }
 .hm-cell {
   display: block;
-  height: 18px;
+  height: 20px;
   border-radius: 3px;
   background: color-mix(
     in srgb,
@@ -270,9 +272,8 @@
     var(--soft)
   );
 }
-.hm-cell.empty {
-  background: var(--soft);
-  opacity: 0.6;
+.hm-cell.none {
+  background: color-mix(in srgb, var(--line) 35%, transparent);
 }
 .hm-cell[data-tip-value]:hover {
   outline: 2px solid var(--fg);
@@ -292,7 +293,7 @@
   border-radius: 4px;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--chart-1) 18%, var(--soft)),
+    color-mix(in srgb, var(--chart-1) 30%, var(--soft)),
     var(--chart-1)
   );
 }
