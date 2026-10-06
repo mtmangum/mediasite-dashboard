@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Added a static sample-data build (`npm run build:demo`) and a GitHub Pages workflow
+  for `mtmangum/mediasite-dashboard`. The demo omits the university wordmark.
+- Replaced instructor selection with a profile display for a personal instructor
+  workspace; semester and course selection remain.
+
 - Fixed the Texas header wordmark scaling to preserve its original proportions.
 
 ## 0.1.0 — 2026-10-06

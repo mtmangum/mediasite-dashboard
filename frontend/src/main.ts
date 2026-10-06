@@ -25,16 +25,12 @@ let courses: Course[] = [],
 let now = Date.now();
 const reports = new Map<string, ViewingCharts>();
 const failures = new Map<string, string>();
-const instructor = element<HTMLSelectElement>("instructor");
 const term = element<HTMLSelectElement>("semester");
 const windowSelect = element<HTMLSelectElement>("window");
 const search = element<HTMLInputElement>("search");
 const dialog = element<HTMLDialogElement>("detail");
 const windowValue = () => windowSelect.value as ReportingWindow;
-const visible = () =>
-  courses.filter(
-    (c) => c.instructor === instructor.value && c.semester === term.value,
-  );
+const visible = () => courses.filter((c) => c.semester === term.value);
 const current = () => visible().find((c) => c.key === selected);
 const number = (n: number | null) => (n === null ? "—" : n.toLocaleString());
 const percent = (n: number | null) =>
@@ -66,13 +62,9 @@ function termOrder(value: string) {
 function updateTerms() {
   options(
     term,
-    [
-      ...new Set(
-        courses
-          .filter((c) => c.instructor === instructor.value)
-          .map((c) => c.semester),
-      ),
-    ].sort((a, b) => termOrder(b) - termOrder(a)),
+    [...new Set(courses.map((c) => c.semester))].sort(
+      (a, b) => termOrder(b) - termOrder(a),
+    ),
   );
 }
 function filteredItems() {
@@ -198,7 +190,9 @@ async function load(fresh = false) {
   setBusy(true);
   element("status").textContent = "Loading library and reports…";
   try {
-    mode = (await fetchJson<{ mode: string }>("/api/config")).mode;
+    mode = __DEMO__
+      ? "demo"
+      : (await fetchJson<{ mode: string }>("/api/config")).mode;
     const items =
       mode === "demo"
         ? demoLibrary().map((r) => r.item)
@@ -211,7 +205,22 @@ async function load(fresh = false) {
     reports.clear();
     failures.clear();
     courses = groupCourses(items);
-    options(instructor, [...new Set(courses.map((c) => c.instructor))].sort());
+    // A display label from metadata, never an account identity or access filter.
+    const names = [...new Set(courses.map((c) => c.instructor))];
+    const name =
+      names.length === 1 && names[0] !== "Unknown instructor"
+        ? names[0]
+        : "Your workspace";
+    element("instructorName").textContent = name;
+    element("instructorInitials").textContent =
+      name === "Your workspace"
+        ? "M"
+        : name
+            .split(/\s+/)
+            .map((part) => part[0])
+            .slice(0, 2)
+            .join("")
+            .toUpperCase();
     updateTerms();
     render();
     element("mode").textContent = mode === "demo" ? "Sample data" : "Live data";
@@ -253,10 +262,6 @@ document.addEventListener("click", (event) => {
     render();
   }
   if (target?.dataset.lecture) openDetail(target.dataset.lecture);
-});
-instructor.addEventListener("change", () => {
-  updateTerms();
-  render();
 });
 term.addEventListener("change", render);
 windowSelect.addEventListener("change", render);

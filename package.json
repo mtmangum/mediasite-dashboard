@@ -8,6 +8,7 @@
     "start": "node --env-file-if-exists=.env server.js",
     "prestart": "npm run build",
     "build": "tsc --noEmit && vite build",
+    "build:demo": "tsc --noEmit && vite build --config vite.demo.config.mjs",
     "typecheck": "tsc --noEmit",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.js",
     "format": "prettier --write frontend *.js *.mjs *.json test *.md",

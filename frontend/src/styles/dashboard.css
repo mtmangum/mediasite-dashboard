@@ -486,3 +486,48 @@ dialog::backdrop {
 #detailBody {
   position: relative;
 }
+
+.instructor-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 26px;
+}
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--fg);
+  font-size: 12px;
+  font-weight: 650;
+  flex-shrink: 0;
+}
+.instructor-profile strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+}
+.instructor-profile div > span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+}
+@media (max-width: 760px) {
+  .instructor-profile {
+    margin-bottom: 18px;
+  }
+}
+.demo-banner {
+  padding: 6px 16px;
+  background: var(--soft, #f4f1ec);
+  color: var(--fg, inherit);
+  font-size: 12px;
+  text-align: center;
+}
+.demo-banner a {
+  color: inherit;
+  text-decoration: underline;
+}

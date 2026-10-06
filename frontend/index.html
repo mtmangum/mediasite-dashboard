@@ -23,10 +23,20 @@
       <aside>
         <div class="workspace-mark">M<span>Instructor workspace</span></div>
         <p class="eyebrow">YOUR LIBRARY</p>
-        <label for="instructor">Instructor</label
-        ><select id="instructor"></select
-        ><label for="semester">Semester</label
-        ><select id="semester"></select>
+        <div class="instructor-profile">
+          <span
+            class="profile-avatar"
+            aria-hidden="true"
+            id="instructorInitials"
+            >M</span
+          >
+          <div>
+            <strong id="instructorName">Your workspace</strong
+            ><span>Instructor</span>
+          </div>
+        </div>
+        <label for="semester">Semester</label>
+        <select id="semester"></select>
         <div class="nav-heading">Courses <span id="courseCount"></span></div>
         <nav id="courses" aria-label="Courses"></nav>
         <div class="aside-note">

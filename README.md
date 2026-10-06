@@ -30,7 +30,7 @@ Credentials stay in `.env` and on the Node server. They are not copied from the 
 
 ## Use the dashboard
 
-- Select an **instructor**, **semester**, and **course**. Lectures appear in chronological order.
+- Select a **semester** and **course** in your instructor workspace. Lectures appear in chronological order.
 - Compare **All time**, **First 7 days**, or **Last 30 days** viewing activity.
 - Select a lecture for its full **all-time** engagement, retention, and audience charts.
 - Use **Refresh** to reload the library and reports; **Retry reports** retries unavailable analytics.
@@ -57,15 +57,20 @@ The comparison window applies to overview metrics; detailed charts are labeled a
 npm run build
 npm test
 npm run format:check
+npm run build:demo   # static sample-data site in dist-demo/
 ```
 
 Frontend files are in `frontend/`; `server.js`, `library.js`, and `analytics.js` serve
 live data. This is a local prototype bound to loopback, not a multi-user instructor
-portal. Instructor filtering is a browsing preference; Mediasite account permissions
-control actual access. No API explorer or write operations are included.
+portal. The workspace uses the library accessible to the configured Mediasite account;
+account permissions control actual access. The instructor name is a display label
+inferred from recording metadata when consistent, not a verified login identity. No API explorer or write operations are included.
 
 ## Repository
 
+The public sample-data demo is built by `.github/workflows/pages.yml` for
+`mtmangum/mediasite-dashboard` and served at https://mtmangum.github.io/mediasite-dashboard/.
+
 This dashboard has its own [Git repository](https://github.austin.utexas.edu/bollox/mediasite-dashboard).
-See [CHANGELOG.md](CHANGELOG.md) for releases and [HANDOFF.md](HANDOFF.md) for project status.
+See [CHANGELOG.md](CHANGELOG.md) for releases and [HANDOFF.md](docs/HANDOFF.md) for project status.
 The adjacent API Tester is a separate project and is not modified by this dashboard.
