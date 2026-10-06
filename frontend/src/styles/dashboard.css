@@ -8,8 +8,10 @@
   color: white;
 }
 .topbar img {
-  width: 235px;
-  max-height: 52px;
+  width: auto;
+  height: 52px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 .topbar-right {
   display: flex;
@@ -391,7 +393,7 @@ dialog::backdrop {
     padding: 0 18px;
   }
   .topbar img {
-    width: 180px;
+    height: 46px;
   }
   .topbar-right > span {
     display: none;

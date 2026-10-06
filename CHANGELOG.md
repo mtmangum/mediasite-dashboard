@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Fixed the Texas header wordmark scaling to preserve its original proportions.
+
 ## 0.1.0 — 2026-10-06
 
 - Added the instructor dashboard with instructor, semester, and course selection.

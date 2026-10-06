@@ -49,6 +49,8 @@ Validation: build/typecheck, all 35 tests, and format checks pass. Safari checks
 confirmed sample loading, course selection, search, first-week comparisons,
 incomplete-window labels, and detailed charts. Reviewed dashboard/report layout;
 fixed hidden tooltip display and positioned report tooltips inside their container.
+The Texas wordmark now has an explicit SVG viewBox and scales by height with auto
+width, preserving its original proportions in desktop and compact headers.
 
 Remaining validation: exercise live data with an authorized Mediasite account and
 verify small-screen behavior on a mobile device. No live credentials are configured.
