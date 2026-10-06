@@ -166,3 +166,31 @@ test("time formatters read naturally", async () => {
   assert.equal(fmtClock(65.9), "1:05");
   assert.equal(fmtClock(5405), "90:05");
 });
+
+test("most-replayed moments skip neighbours of a stronger peak", async () => {
+  const { distinctPeaks } = await load();
+  const seg = (startSeconds, views) => ({
+    startSeconds,
+    durationSeconds: 30,
+    views,
+  });
+  const timeline = [
+    seg(0, 3),
+    seg(2430, 12),
+    seg(2460, 12),
+    seg(2490, 11),
+    seg(2520, 10),
+    seg(600, 8),
+    seg(660, 7),
+    seg(1500, 0),
+  ];
+  assert.deepEqual(
+    distinctPeaks(timeline, 120, 5).map((s) => s.startSeconds),
+    [2430, 600, 0],
+  );
+  assert.deepEqual(
+    distinctPeaks(timeline, 120, 1).map((s) => s.startSeconds),
+    [2430],
+  );
+  assert.equal(distinctPeaks([], 120, 5).length, 0);
+});

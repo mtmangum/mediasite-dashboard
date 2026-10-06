@@ -387,13 +387,15 @@
   gap: 1px;
   padding: 6px 10px;
   border-radius: 8px;
-  background: var(--fg);
-  color: var(--bg);
+  border: 1px solid var(--tip-line);
+  background: var(--tip-bg);
+  color: var(--tip-fg);
   white-space: nowrap;
   pointer-events: none;
   box-shadow: 0 6px 18px #00000040;
 }
 .chart-tip strong {
+  color: var(--tip-accent);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 }

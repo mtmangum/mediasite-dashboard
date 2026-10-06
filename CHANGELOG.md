@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Added a calendar view to the lecture library, with month navigation and a hover/focus
+  tooltip on each day showing the lectures' sessions, median watch time, and completion.
+- Tooltips use dedicated light/dark colors instead of inverting the page, with orange values,
+  blue times, and yellow notes.
+- Most-replayed moments are now at least two minutes apart, and the list shows eight.
 - Simplified the sidebar: removed the placeholder "M Instructor workspace" mark, the avatar,
   and repeated labels. The profile shows the name and recording count, the semester selector
   appears only with more than one semester, course cards show sessions, the grouping caveat

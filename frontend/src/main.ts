@@ -5,6 +5,7 @@ import "./theme";
 import { element, errorMessage } from "./shared";
 import type { Presentation, ViewingCharts } from "./shared";
 import { fetchJson } from "./http";
+import { dayKeyFor, monthKey, monthsFor, renderCalendar } from "./calendar";
 import { demoLibrary, demoResponse } from "./demo-api";
 import { esc, fmtDuration, fmtSpan } from "./format";
 import {
@@ -19,6 +20,17 @@ import {
 import type { Frame } from "./recording-pane";
 import { renderViewingCharts } from "./viewing-charts";
 
+type LibraryView = "list" | "calendar";
+const viewKey = "mediasite-library-view";
+let view: LibraryView = "list";
+try {
+  if (localStorage.getItem(viewKey) === "calendar") view = "calendar";
+} catch {
+  // The view still switches when browser storage is unavailable.
+}
+let calMonth = "";
+const calendarTips = new Map<string, string>();
+let calendarFoot = "";
 let multiInstructor = false;
 let courses: Course[] = [],
   selected = "",
@@ -98,7 +110,81 @@ function dateRange(c: Course) {
   const sameYear = first.getFullYear() === last.getFullYear();
   return `${text(first, !sameYear)} – ${text(last, true)}`;
 }
+function lectureNote(item: Presentation, m: ReturnType<typeof lectureMetrics>) {
+  return failures.has(item.id)
+    ? "Report unavailable"
+    : !reports.has(item.id)
+      ? "Loading report…"
+      : reports.get(item.id)?.sessions === null
+        ? "Session data unavailable"
+        : windowValue() === "first7" && !m
+          ? "Release date unavailable"
+          : windowValue() === "first7" && firstWeekIncomplete(item, now)
+            ? "First week in progress"
+            : "";
+}
+function listView(items: Presentation[]) {
+  return `<div class="table-scroll"><table class="lecture-table"><thead><tr><th scope="col">Lecture</th><th scope="col">Length</th><th scope="col">Sessions</th><th scope="col">Median watch</th><th scope="col">Completion</th></tr></thead><tbody>${items
+    .map((item) => {
+      const m = lectureMetrics(item, reports.get(item.id), windowValue(), now);
+      const note = lectureNote(item, m);
+      return `<tr><th scope="row"><button class="lecture-link" data-lecture="${esc(item.id)}">${item.thumbnail ? `<img src="${esc(item.thumbnail)}" alt="" loading="lazy">` : '<span class="thumbnail-placeholder">▶</span>'}<span><strong>${esc(date(item))}</strong><span>${esc(item.title || "Untitled")}</span>${note ? `<small class="${failures.has(item.id) ? "bad" : "muted"}">${esc(note)}</small>` : ""}</span></button></th><td>${fmtDuration(item.durationMs)}</td><td>${number(m?.total ?? null)}</td><td>${span(m?.medianWatched ?? null)}</td><td>${percent(m?.completionRate ?? null)}</td></tr>`;
+    })
+    .join("")}</tbody></table></div>`;
+}
+function calendarView(items: Presentation[]) {
+  const months = monthsFor(items);
+  if (!months.includes(calMonth)) {
+    // Open on the latest month with a lecture so far, else the first.
+    const thisMonth = monthKey(now);
+    calMonth = months.filter((m) => m <= thisMonth).pop() ?? months[0] ?? "";
+  }
+  const metrics = new Map(
+    items.map((i) => [
+      i.id,
+      lectureMetrics(i, reports.get(i.id), windowValue(), now),
+    ]),
+  );
+  const most = Math.max(0, ...[...metrics.values()].map((m) => m?.total ?? 0));
+  if (!months.length) return listView(items);
+  calendarTips.clear();
+  const windowName = windowSelect.selectedOptions[0]?.text ?? "";
+  for (const item of items) {
+    const at = recordingDate(item);
+    if (at === null) continue;
+    const m = metrics.get(item.id) ?? null;
+    const note = lectureNote(item, m);
+    const row = (label: string, value: string) =>
+      `<dt>${label}</dt><dd>${esc(value)}</dd>`;
+    const key = dayKeyFor(at);
+    calendarTips.set(
+      key,
+      (calendarTips.get(key) ?? "") +
+        `<div class="cal-tip-item"><strong>${esc(item.title || "Untitled")}</strong><span>${esc(new Date(at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }))} · ${esc(fmtDuration(item.durationMs))}</span>${
+          m
+            ? `<dl>${row("Sessions", number(m.total))}${row("Median watch", span(m.medianWatched))}${row("Completion", percent(m.completionRate))}</dl>`
+            : ""
+        }${note ? `<em>${esc(note)}</em>` : ""}</div>`,
+    );
+  }
+  calendarFoot = `${windowName} · Select a lecture to open its report`;
+  return renderCalendar(items, calMonth, months, (item) => {
+    const m = metrics.get(item.id) ?? null;
+    if (!m)
+      return {
+        value: "—",
+        note: lectureNote(item, m) || "unavailable",
+        level: null,
+      };
+    return {
+      value: number(m.total),
+      note: lectureNote(item, m) ? "sessions · partial" : "sessions",
+      level: most ? Math.sqrt(m.total / most) : 0,
+    };
+  });
+}
 function render() {
+  hideCalTip();
   const list = visible();
   if (!list.some((c) => c.key === selected)) selected = list[0]?.key || "";
   const course = current();
@@ -144,31 +230,17 @@ function render() {
       )}</tbody></table></div><p class="table-note">${windowValue() === "first7" ? "Seven days from each release date; newer lectures have an incomplete window. Missing release dates are excluded." : windowValue() === "last30" ? "Sessions opened in the rolling 30 days through this refresh." : "All recorded session history through this refresh."} Unavailable reports are excluded from course totals.</p>`;
   const items = filteredItems();
   element("lectureCount").textContent =
-    `${items.length} of ${course?.items.length || 0} recordings · earliest first`;
-  element("lectures").innerHTML = items.length
-    ? `<div class="table-scroll"><table class="lecture-table"><thead><tr><th scope="col">Lecture</th><th scope="col">Length</th><th scope="col">Sessions</th><th scope="col">Median watch</th><th scope="col">Completion</th></tr></thead><tbody>${items
-        .map((item) => {
-          const m = lectureMetrics(
-            item,
-            reports.get(item.id),
-            windowValue(),
-            now,
-          );
-          const note = failures.has(item.id)
-            ? "Report unavailable"
-            : !reports.has(item.id)
-              ? "Loading report…"
-              : reports.get(item.id)?.sessions === null
-                ? "Session data unavailable"
-                : windowValue() === "first7" && !m
-                  ? "Release date unavailable"
-                  : windowValue() === "first7" && firstWeekIncomplete(item, now)
-                    ? "First week in progress"
-                    : "";
-          return `<tr><th scope="row"><button class="lecture-link" data-lecture="${esc(item.id)}">${item.thumbnail ? `<img src="${esc(item.thumbnail)}" alt="" loading="lazy">` : '<span class="thumbnail-placeholder">▶</span>'}<span><strong>${esc(date(item))}</strong><span>${esc(item.title || "Untitled")}</span>${note ? `<small class="${failures.has(item.id) ? "bad" : "muted"}">${esc(note)}</small>` : ""}</span></button></th><td>${fmtDuration(item.durationMs)}</td><td>${number(m?.total ?? null)}</td><td>${span(m?.medianWatched ?? null)}</td><td>${percent(m?.completionRate ?? null)}</td></tr>`;
-        })
-        .join("")}</tbody></table></div>`
-    : '<p class="empty">No lectures match your selection.</p>';
+    `${items.length} of ${course?.items.length || 0} recordings${view === "list" ? " · earliest first" : ""}`;
+  document
+    .querySelectorAll<HTMLElement>("[data-view]")
+    .forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.view === view)),
+    );
+  element("lectures").innerHTML = !items.length
+    ? '<p class="empty">No lectures match your selection.</p>'
+    : view === "calendar"
+      ? calendarView(items)
+      : listView(items);
   element<HTMLButtonElement>("retry").hidden =
     !failures.size && ![...reports.values()].some((r) => r.sessions === null);
   element<HTMLButtonElement>("export").disabled = !course || busy;
@@ -283,14 +355,80 @@ function openDetail(id: string) {
 }
 document.addEventListener("click", (event) => {
   const target = (event.target as HTMLElement).closest<HTMLElement>(
-    "[data-course],[data-lecture]",
+    "[data-course],[data-lecture],[data-view],[data-month]",
   );
   if (target?.dataset.course) {
     selected = target.dataset.course;
     search.value = "";
+    calMonth = "";
+    render();
+  }
+  if (target?.dataset.view) {
+    view = target.dataset.view === "calendar" ? "calendar" : "list";
+    try {
+      localStorage.setItem(viewKey, view);
+    } catch {}
+    render();
+  }
+  if (target?.dataset.month) {
+    calMonth = target.dataset.month;
     render();
   }
   if (target?.dataset.lecture) openDetail(target.dataset.lecture);
+});
+// A tooltip for calendar days: every lecture that day with its figures, shown on hover or focus.
+const calTip = document.createElement("div");
+calTip.className = "cal-tip";
+calTip.id = "calTip";
+calTip.setAttribute("role", "tooltip");
+calTip.hidden = true;
+document.body.append(calTip);
+function showCalTip(day: HTMLElement) {
+  const html = calendarTips.get(day.dataset.day || "");
+  if (!html) return hideCalTip();
+  const [year, month, d] = (day.dataset.day || "").split("-").map(Number);
+  const heading = new Date(year, month - 1, d).toLocaleDateString([], {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  calTip.innerHTML = `<div class="cal-tip-head">${esc(heading)}</div>${html}<div class="cal-tip-foot">${esc(calendarFoot)}</div>`;
+  calTip.hidden = false;
+  const box = day.getBoundingClientRect();
+  const width = calTip.offsetWidth,
+    height = calTip.offsetHeight;
+  const left = Math.max(
+    8,
+    Math.min(
+      box.left + box.width / 2 - width / 2,
+      document.documentElement.clientWidth - width - 8,
+    ),
+  );
+  const top = box.top - height - 8 >= 8 ? box.top - height - 8 : box.bottom + 8;
+  calTip.style.transform = `translate(${left}px, ${top}px)`;
+  day
+    .querySelectorAll(".cal-lecture")
+    .forEach((b) => b.setAttribute("aria-describedby", "calTip"));
+}
+function hideCalTip() {
+  calTip.hidden = true;
+}
+const calDay = (event: Event) =>
+  (event.target as HTMLElement).closest<HTMLElement>("td[data-day]");
+element("lectures").addEventListener("pointerover", (event) => {
+  const day = calDay(event);
+  if (day) showCalTip(day);
+  else hideCalTip();
+});
+element("lectures").addEventListener("pointerleave", hideCalTip);
+element("lectures").addEventListener("focusin", (event) => {
+  const day = calDay(event);
+  if (day) showCalTip(day);
+});
+element("lectures").addEventListener("focusout", hideCalTip);
+window.addEventListener("scroll", hideCalTip, true);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideCalTip();
 });
 term.addEventListener("change", render);
 windowSelect.addEventListener("change", render);

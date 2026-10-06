@@ -37,6 +37,8 @@ Credentials stay in `.env` and on the Node server. They are not copied from the 
   point in the recording. Live data opens the Mediasite player there on request; the sample
   demo shows the nearest sample frame.
 - Use **Refresh** to reload the library and reports; **Retry reports** retries unavailable analytics.
+- Switch the lecture library between a **List** and a month **Calendar**; hover a day for each
+  lecture's sessions, median watch time, and completion.
 - Search lecture titles or descriptions, or export the selected course's metrics as CSV.
 
 Course grouping uses the parsed course/section/instructor in recording titles and

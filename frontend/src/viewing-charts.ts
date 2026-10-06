@@ -4,6 +4,7 @@ import type { Presentation, SessionRecord, ViewingCharts } from "./shared";
 import {
   COMPLETE_SHARE,
   deviceCounts,
+  distinctPeaks,
   earlyShare,
   heatmapPeaks,
   replayPeak,
@@ -17,6 +18,9 @@ import {
   type Heatmap,
 } from "./viewing-stats";
 
+// Most-replayed moments are listed at least this far apart.
+const MOMENT_BUFFER_SECONDS = 120;
+const MOMENTS_SHOWN = 8;
 const count = (value: number) => value.toLocaleString();
 const pct = (share: number) => `${Math.round(share * 100)}%`;
 const plural = (n: number, one: string, many = `${one}s`) =>
@@ -169,12 +173,9 @@ function timelinePanel(
   const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L${(lastEnd / end) * 600} 176 L${(Math.min(end, timeline[0].startSeconds) / end) * 600} 176 Z"/><path class="chart-line" d="${line}"/><path class="chart-marker" d="M0 0V180" hidden/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><g class="chart-point"><path d="M0 0h0"/><path d="M0 0h0"/></g></g>`;
   const edge = peakX < 14 ? " start" : peakX > 86 ? " end" : "";
   const overlay = `<span class="peak-label${edge}" style="left:${peakX}%;top:${(y(peakSegment.views, max) / 180) * 100}%">Most replayed · ${esc(fmtClock(peakSegment.startSeconds))}</span>`;
-  const top = [...timeline]
-    .filter((s) => s.views > 0)
-    .sort((a, b) => b.views - a.views || a.startSeconds - b.startSeconds)
-    .slice(0, 10);
+  const top = distinctPeaks(timeline, MOMENT_BUFFER_SECONDS, 10);
   const moments = top
-    .slice(0, 5)
+    .slice(0, MOMENTS_SHOWN)
     .map(
       (s) =>
         `<li><button type="button" class="moment" data-seek="${s.startSeconds}"><strong>${esc(fmtClock(s.startSeconds))}</strong><span>${esc(plural(s.views, "view"))}</span></button></li>`,
@@ -525,7 +526,7 @@ export function renderViewingCharts(
   container.innerHTML = `<div class="stat-grid">${tiles}</div>${
     notes.length
       ? `<ul class="insights" aria-label="What stands out">${notes
-          .slice(0, 5)
+          .slice(0, MOMENTS_SHOWN)
           .map((n) => `<li>${esc(n)}</li>`)
           .join("")}</ul>`
       : ""

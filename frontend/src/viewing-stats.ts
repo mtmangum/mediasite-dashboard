@@ -142,6 +142,29 @@ export function replayPeak(timeline: Timeline): Segment | null {
   return best && best.views > 0 ? best : null;
 }
 
+// The most-viewed segments, strongest first, skipping any that start within `bufferSeconds` of a
+// stronger pick, so the list covers different parts of the recording rather than one peak's neighbours.
+export function distinctPeaks(
+  timeline: Timeline,
+  bufferSeconds: number,
+  limit: number,
+): Segment[] {
+  const picked: Segment[] = [];
+  const ranked = timeline
+    .filter((s) => s.views > 0)
+    .sort((a, b) => b.views - a.views || a.startSeconds - b.startSeconds);
+  for (const s of ranked) {
+    if (picked.length >= limit) break;
+    if (
+      picked.every(
+        (p) => Math.abs(p.startSeconds - s.startSeconds) >= bufferSeconds,
+      )
+    )
+      picked.push(s);
+  }
+  return picked;
+}
+
 // Share of the reported recording time (up to `endSeconds`) that has no views at all.
 export function unwatchedShare(timeline: Timeline, endSeconds: number) {
   let total = 0,
