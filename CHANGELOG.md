@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Security: removed the built-in default Mediasite server; live mode now requires an https
+  `MEDIASITE_BASE_URL` and refuses to start otherwise. API requests no longer follow
+  redirects. Added a public-repo guard test and `docs/public-repo-security-review.md`.
 - Recording pane uses the documented `autostart` parameter and says where to scrub if the
   player ignores the start time.
 - Chart area fades are now neutral Blue Gray rather than a tint of burnt orange.

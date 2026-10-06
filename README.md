@@ -23,7 +23,7 @@ Stop with **Ctrl+C**. Use `npm start` to build and serve production assets.
 cp .env.example .env
 ```
 
-Set `DATA_MODE=live` and fill in the API URL, key, username, and password. Restart.
+Set `DATA_MODE=live` and fill in the API URL (https; there is no default server), key, username, and password. Restart.
 The account needs API Access and permission to read presentation analytics. Obtain a
 key at `https://YOUR-SERVER/Mediasite/Api/Docs/ApiKeyRegistration.aspx` or ask your admin.
 Credentials stay in `.env` and on the Node server. They are not copied from the original app.

@@ -85,6 +85,15 @@ A static sample-data build (`npm run build:demo`, `vite.demo.config.mjs`) and
 (site: https://mtmangum.github.io/mediasite-dashboard/). The public repo and `github` remote exist but nothing is pushed yet. Remaining: push after
 confirming with the user, then enable Pages with the GitHub Actions source. The demo omits the UT wordmark, as the original app's demo does.
 
+## Public-repo security
+
+See `docs/public-repo-security-review.md` (covers this repo and `../apiTest`). Live mode has no
+default server and refuses to start without a valid https `MEDIASITE_BASE_URL`; API calls refuse
+redirects; `test/public-repo.test.js` guards against tracked env/key files and real hosts.
+Open owner decisions: UT wordmarks and real lecture frames in the public source, the commit
+author email, and the UT GitHub Enterprise links in docs. In `../apiTest` (not modified):
+`screenshot.png` shows real instructor names and view counts on the public remote.
+
 ## Run
 
 `npm ci`, then `npm run dev`; open http://localhost:3100.

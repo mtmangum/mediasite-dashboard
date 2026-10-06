@@ -1,6 +1,6 @@
 const http = require("node:http");
 const path = require("node:path");
-const { getConfig, authHeaders } = require("./mediasite");
+const { getConfig, configProblem, authHeaders } = require("./mediasite");
 const { getLibrary } = require("./library");
 const { getViewingCharts } = require("./analytics");
 const { sendJson, SECURITY_HEADERS } = require("./http-utils");
@@ -10,6 +10,13 @@ const PORT = Number(process.env.PORT) || 3100;
 const MODE = process.env.DATA_MODE || "demo";
 const DEV = process.argv.includes("--dev");
 const cfg = getConfig();
+if (MODE === "live") {
+  const problem = configProblem(cfg);
+  if (problem) {
+    console.error(problem);
+    process.exit(1);
+  }
+}
 const reports = new Map();
 let library;
 const TTL = 5 * 60 * 1000;
