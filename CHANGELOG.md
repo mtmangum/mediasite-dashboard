@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Header: "Mediasite Instructor Dashboard" is now one lockup beside the UT wordmark, with a bold
+  "Mediasite" and a lighter "Instructor Dashboard" on one baseline. It scales down in steps so
+  it never collides with the sample/live badge or the theme button (checked from 360 to
+  1400px), and stacks into two lines on phones. The public demo shows the lockup without the
+  wordmark.
 - Security: removed the built-in default Mediasite server; live mode now requires an https
   `MEDIASITE_BASE_URL` and refuses to start otherwise. API requests no longer follow
   redirects. Added a public-repo guard test and `docs/public-repo-security-review.md`.

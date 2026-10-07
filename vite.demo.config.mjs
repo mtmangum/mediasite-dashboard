@@ -19,10 +19,7 @@ const demoSite = {
     handler: (html) =>
       html
         // The official university wordmarks are not part of the public demo.
-        .replace(
-          /<img\s+src="\/brand\/[\s\S]*?\/>/,
-          "<strong>Instructor Dashboard</strong>",
-        )
+        .replace(/<img\s+src="\/brand\/[\s\S]*?\/>/, "")
         .replace(
           /<body[^>]*>/,
           (body) =>
