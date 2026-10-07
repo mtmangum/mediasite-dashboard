@@ -87,6 +87,10 @@ aside select {
   color: var(--muted);
   font-weight: 400;
 }
+/* Fixed to the icon's size: the open popover is absolutely positioned and must not move the text around it. */
+.hint {
+  height: 24px;
+}
 .hint summary {
   display: grid;
   place-items: center;
@@ -384,6 +388,7 @@ td {
   top: 8px;
 }
 dialog {
+  --dialog-pad: 28px;
   width: min(1100px, 94vw);
   max-height: 90vh;
   overflow: auto;
@@ -391,14 +396,30 @@ dialog {
   color: var(--fg);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 28px;
+  padding: var(--dialog-pad);
 }
 dialog::backdrop {
   background: #0009;
 }
+/* The title and close button stay in view while the report scrolls beneath them. */
 .detail-heading {
+  position: sticky;
+  top: calc(var(--dialog-pad) * -1);
+  z-index: 10;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin: calc(var(--dialog-pad) * -1) calc(var(--dialog-pad) * -1) 20px;
+  padding: var(--dialog-pad) var(--dialog-pad) 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.detail-heading > div:first-child {
+  min-width: 0;
+}
+.detail-heading p {
+  margin: 2px 0;
+}
+.detail-heading .eyebrow {
+  margin-bottom: 4px;
 }
 .detail-heading p {
   font-size: 12px;
@@ -586,7 +607,16 @@ dialog::backdrop {
     padding: 14px 18px;
   }
   dialog {
-    padding: 18px;
+    --dialog-pad: 18px;
+  }
+  .detail-heading {
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+  #detailMeta {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .lecture-link > span {
     min-width: 190px;
@@ -991,6 +1021,9 @@ th[aria-sort="descending"] .sort {
   }
   .strip {
     gap: 3px;
+  }
+  .hint {
+    height: 32px;
   }
   .hint summary {
     width: 32px;

@@ -481,6 +481,7 @@ function openDetail(id: string) {
     element("detailBody").innerHTML =
       `<p class="empty">${esc(failures.get(id) || "Report is loading. Close and reopen when reports finish loading.")}</p>`;
   dialog.showModal();
+  dialog.scrollTop = 0;
 }
 document.addEventListener("click", (event) => {
   const target = (event.target as HTMLElement).closest<HTMLElement>(
@@ -589,6 +590,17 @@ for (const area of [element("lectures"), element("overview")]) {
   });
   area.addEventListener("focusout", hideTip);
 }
+// An open info hint closes on a click elsewhere or Escape.
+const closeHints = (except?: Element | null) =>
+  document
+    .querySelectorAll<HTMLDetailsElement>("details.hint[open]")
+    .forEach((d) => d !== except && d.removeAttribute("open"));
+document.addEventListener("click", (event) =>
+  closeHints((event.target as Element).closest("details.hint")),
+);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeHints();
+});
 window.addEventListener("scroll", hideTip, true);
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") hideTip();

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Fixed the info icons shifting the text below them when opened. An open hint now also closes
+  on a click elsewhere or Escape.
+- Lecture report: the title, course line, and close button now stay at the top while the report
+  scrolls. Opening a report always starts at the top, and on phones the course line truncates
+  to one line to keep the bar short.
 - Header: "Mediasite Instructor Dashboard" is now one lockup beside the UT wordmark, with a bold
   "Mediasite" and a lighter "Instructor Dashboard" on one baseline. It scales down in steps so
   it never collides with the sample/live badge or the theme button (checked from 360 to
