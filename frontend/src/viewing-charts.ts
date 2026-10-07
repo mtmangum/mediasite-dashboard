@@ -1,3 +1,4 @@
+import { bindTranscript, transcriptPanel } from "./transcript";
 import { esc, fmtClock, fmtSpan, fmtTime } from "./format";
 import { bindRecording, recordingPane, type Frame } from "./recording-pane";
 import type { Presentation, SessionRecord, ViewingCharts } from "./shared";
@@ -18,7 +19,7 @@ import {
   type Heatmap,
 } from "./viewing-stats";
 
-// Most-replayed moments are listed at least this far apart.
+// Most-viewed moments are listed at least this far apart.
 const MOMENT_BUFFER_SECONDS = 120;
 const MOMENTS_SHOWN = 8;
 const INSIGHTS_SHOWN = 5;
@@ -173,19 +174,19 @@ function timelinePanel(
     100;
   const marks = `<defs><linearGradient id="timelineWash" x1="0" y1="0" x2="0" y2="1"><stop class="chart-wash-top" offset="0"/><stop class="chart-wash-bottom" offset="1"/></linearGradient></defs><path class="chart-area" d="${line} L${(lastEnd / end) * 600} 176 L${(Math.min(end, timeline[0].startSeconds) / end) * 600} 176 Z"/><path class="chart-line" d="${line}"/><path class="chart-marker" d="M0 0V180" hidden/><g class="chart-selection" hidden><path class="chart-crosshair" d="M0 0V180"/><g class="chart-point"><path d="M0 0h0"/><path d="M0 0h0"/></g></g>`;
   const edge = peakX < 14 ? " start" : peakX > 86 ? " end" : "";
-  const overlay = `<span class="peak-label${edge}" style="left:${peakX}%;top:${(y(peakSegment.views, max) / 180) * 100}%">Most replayed · ${esc(fmtClock(peakSegment.startSeconds))}</span>`;
+  const overlay = `<span class="peak-label${edge}" style="left:${peakX}%;top:${(y(peakSegment.views, max) / 180) * 100}%">Most viewed · ${esc(fmtClock(peakSegment.startSeconds))}</span>`;
   const top = distinctPeaks(timeline, MOMENT_BUFFER_SECONDS, 10);
   const moments = top
     .slice(0, MOMENTS_SHOWN)
     .map(
       (s) =>
-        `<li><button type="button" class="moment" data-seek="${s.startSeconds}"><strong>${esc(fmtClock(s.startSeconds))}</strong><span>${esc(plural(s.views, "view"))}</span></button></li>`,
+        `<li><button type="button" class="moment" data-seek="${s.startSeconds}" data-segment-end="${Math.min(end, s.startSeconds + s.durationSeconds)}"><strong>${esc(fmtClock(s.startSeconds))}</strong><span>${esc(plural(s.views, "view"))}</span></button></li>`,
     )
     .join("");
   return panel(
     "Engagement across the recording",
     "How many views each stretch of the recording received, including replays. Hover to read a moment; click, tap, or press Enter to see it in the recording.",
-    `<div class="recording-sync">${recordingPane(presentation, frames)}<div class="moments"><h4>Most replayed moments</h4><ol>${moments}</ol></div></div>` +
+    `<div class="recording-sync">${recordingPane(presentation, frames)}<div class="moments"><h4>Most viewed moments</h4><ol>${moments}</ol></div></div>` +
       plot(
         "segment",
         "Segment views along the recording",
@@ -200,7 +201,7 @@ function timelinePanel(
         { focusable: true, overlay },
       ) +
       dataTable(
-        "Most replayed moments",
+        "Most viewed moments",
         ["Moment", "Views"],
         top.map((s) => [
           `${fmtClock(s.startSeconds)}–${fmtClock(Math.min(end, s.startSeconds + s.durationSeconds))}`,
@@ -499,7 +500,7 @@ export function renderViewingCharts(
           .map((n) => `<li>${esc(n)}</li>`)
           .join("")}</ul>`
       : ""
-  }<div class="viewing-grid">${timelinePanel(data, end, peakSegment, presentation, frames)}${
+  }<div class="viewing-grid">${timelinePanel(data, end, peakSegment, presentation, frames)}${transcriptPanel()}${
     sessions
       ? daysPanel(all) + heatmapPanel(heatmap)
       : panel(
@@ -516,13 +517,33 @@ export function renderViewingCharts(
         )
   }${retentionPanel(data, sessions, stats.medianWatched)}${audiencePanel(sessions, viewers)}</div><p class="chart-caption muted">Updated ${esc(fmtTime(data.fetchedAt))} · Sessions are not unique viewers, and no identities are shown. Timeline counts can differ because of reporting thresholds.</p>`;
 
-  bindInteractions(
+  const showRecording = bindRecording(container, presentation, frames);
+  let showTranscript: (seconds: number, end?: number) => void = () => {};
+  const selectMoment = bindInteractions(
     container,
     timeline,
     end,
     peakSegment,
     sessions,
-    bindRecording(container, presentation, frames),
+    (seconds) => {
+      showRecording(seconds);
+      const segment = timeline?.find(
+        (s) =>
+          seconds >= s.startSeconds &&
+          seconds < s.startSeconds + s.durationSeconds,
+      );
+      showTranscript(
+        seconds,
+        segment ? segment.startSeconds + segment.durationSeconds : seconds + 30,
+      );
+    },
+  );
+  showTranscript = bindTranscript(
+    container,
+    presentation,
+    end,
+    frames !== null,
+    selectMoment,
   );
 }
 
@@ -646,6 +667,7 @@ function bindInteractions(
   sessions: SessionRecord[] | null,
   showInRecording: (seconds: number) => void,
 ) {
+  let selectMoment = showInRecording;
   const tip = createTip(container);
 
   // Bars, heatmap cells, and device segments: the mark itself is the hover target.
@@ -693,6 +715,7 @@ function bindInteractions(
       });
       showInRecording(seconds);
     };
+    selectMoment = choose;
     container
       .querySelectorAll<HTMLElement>("[data-seek]")
       .forEach((button) =>
@@ -758,4 +781,5 @@ function bindInteractions(
       },
     });
   }
+  return selectMoment;
 }

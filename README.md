@@ -35,9 +35,14 @@ Credentials stay in `.env` and on the Node server. They are not copied from the 
   each figure beside the semester's other courses, and **Sessions by lecture** shows where
   interest rises and falls across the semester.
 - Select a lecture for its full **all-time** engagement, retention, and audience charts.
-- In a lecture report, click the engagement chart (or a most-replayed moment) to see that
+- In a lecture report, click the engagement chart (or a most-viewed moment) to see that
   point in the recording. Live data opens the Mediasite player there on request; the sample
   demo shows the nearest sample frame.
+- Read the **Transcript** in a lecture report, search its text, or select a timestamp.
+  Most viewed moments include caption excerpts. Import this lecture’s VTT, SRT, or
+  DFXP/TTML caption file; imports stay in browser memory until the page reloads. Common
+  absolute TTML timestamps are supported; relative/frame timing requires a VTT/SRT export.
+  Demo transcripts are fictional. Automatic live caption retrieval is not connected.
 - Use **Refresh** to reload the library and reports; **Retry reports** retries unavailable analytics.
 - Sort the lecture list by any column. Lectures are numbered by recording date.
 - Switch the lecture library between a **List** and a month **Calendar**; hover a day for each
@@ -53,6 +58,9 @@ Live mode follows API pagination rather than stopping at the latest 100 recordin
 Repeated, foreign, or excessively large pagination fails explicitly rather than
 presenting an incomplete library as complete. Report failures show unavailable values,
 not zero activity. Newer lectures show when their first seven days are incomplete.
+
+Segment views include first views and replays; “Most viewed moments” does not isolate
+repeat viewing or explain why a moment was watched.
 
 Session counts are not student counts, and viewing is not evidence of learning or
 attendance. "Watched nearly all" means at least 85% recorded coverage among watched sessions

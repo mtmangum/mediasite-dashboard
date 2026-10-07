@@ -54,6 +54,13 @@ The initial instructor dashboard is implemented. It includes:
 - Detailed all-time interactive lecture charts in a keyboard-dismissable dialog. Choosing a
   moment on the engagement chart shows it in a recording pane; the live player loads only on
   request, since playing it registers a session in that lecture's analytics.
+- Searchable timestamped transcripts in lecture reports, aligned to chart selections and
+  clickable caption timestamps. Most viewed moments show excerpts (sample cues include
+  authored topic labels). Caption imports support VTT, SRT, and common absolute-time
+  DFXP/TTML, stay in browser memory by recording, and are not uploaded. Demo transcripts
+  are explicitly fictional. Live caption retrieval and AI topic summaries are not implemented.
+  “Most viewed moments” replaces “Most replayed”: the API timeline includes first views
+  and replays, without isolating repeat viewing.
 - Two fictional courses and 24 sample lectures with illustrative screenshots.
 - A read-only loopback server, server-side credential configuration, full library
   pagination, and explicit unavailable metrics when reports cannot be loaded.
@@ -63,10 +70,14 @@ Reused local copies of the API helpers, analytics normalization, title parser,
 viewing statistics, chart renderer, typography, UT branding, Inter font/license,
 and 36 illustrative screenshot assets. No API credentials were copied.
 
-Validation: build/typecheck, all 35 tests, and format checks pass. Safari checks
+Validation: build/typecheck, all 53 tests, and format checks pass. Safari checks
 confirmed sample loading, course selection, search, first-week comparisons,
 incomplete-window labels, and detailed charts. Reviewed dashboard/report layout;
 fixed hidden tooltip display and positioned report tooltips inside their container.
+Transcript validation: Safari confirmed moment-to-excerpt selection, transcript search,
+and transcript-to-recording selection. DOM checks verified DFXP parsing, local import,
+invalid-import preservation, unsupported TTML timing rejection, and per-recording
+import isolation. Build, demo build, all 53 tests, and formatting pass.
 The Texas wordmark now has an explicit SVG viewBox and scales by height with auto
 width, preserving its original proportions in desktop and compact headers.
 
@@ -82,8 +93,9 @@ This remains a local prototype, not a multi-user instructor portal. The original
 
 A static sample-data build (`npm run build:demo`, `vite.demo.config.mjs`) and
 `.github/workflows/pages.yml` are ready for a public repo named `mtmangum/mediasite-dashboard`
-(site: https://mtmangum.github.io/mediasite-dashboard/). The public repo and `github` remote exist but nothing is pushed yet. Remaining: push after
-confirming with the user, then enable Pages with the GitHub Actions source. The demo omits the UT wordmark, as the original app's demo does.
+(site: https://mtmangum.github.io/mediasite-dashboard/). The public repo and `github` remote exist, and dashboard source is pushed to both
+`origin/main` and `github/main`. Pages deployment status has not been verified in this
+session. The demo omits the UT wordmark, as the original app's demo does.
 
 ## Public-repo security
 

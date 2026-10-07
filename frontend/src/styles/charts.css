@@ -592,3 +592,71 @@
   margin: 14px 0;
   font-size: 13px;
 }
+/* Captions stay readable in both the lecture report and compact screens. */
+.moment {
+  flex-wrap: wrap;
+}
+.moment-caption {
+  flex-basis: 100%;
+  color: var(--fg);
+  line-height: 1.45;
+}
+.transcript-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  margin: 14px 0;
+}
+.transcript-tools label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 100%;
+  font-size: var(--text-small);
+}
+.transcript-tools input {
+  max-width: 100%;
+}
+.transcript-context {
+  padding: 12px;
+  border-left: 3px solid var(--ink-data);
+  background: var(--soft);
+  line-height: 1.6;
+}
+.transcript-error:empty {
+  display: none;
+}
+.transcript-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 12px;
+}
+.transcript-cue {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  width: 100%;
+  padding: 10px 12px;
+  text-align: left;
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  line-height: 1.6;
+}
+.transcript-cue strong {
+  color: var(--ink-data);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.transcript-cue.active,
+.transcript-cue:hover {
+  background: var(--soft);
+  border-color: var(--ink-data);
+}
+.transcript-source,
+.transcript-context,
+.transcript-cue span,
+.moment-caption {
+  overflow-wrap: anywhere;
+}
