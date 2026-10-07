@@ -56,7 +56,9 @@ The initial instructor dashboard is implemented. It includes:
   request, since playing it registers a session in that lecture's analytics.
 - Searchable timestamped transcripts in lecture reports, aligned to chart selections and
   clickable caption timestamps. Most viewed moments show excerpts (sample cues include
-  authored topic labels). Caption imports support VTT, SRT, and common absolute-time
+  authored topic labels). The video sidebar shows four compact moments with single-line
+  text previews; full passages stay in the transcript pane and additional moments remain
+  in the exact-count table. Safari confirmed the compact list fits beside the recording. Caption imports support VTT, SRT, and common absolute-time
   DFXP/TTML, stay in browser memory by recording, and are not uploaded. Demo transcripts
   are explicitly fictional. Live caption retrieval and AI topic summaries are not implemented.
   “Most viewed moments” replaces “Most replayed”: the API timeline includes first views

@@ -240,7 +240,8 @@ export function bindTranscript(
       const text = cue?.topic || excerpt || "No captions at this moment";
       const label = document.createElement("small");
       label.className = "moment-caption";
-      label.textContent = text.length > 160 ? `${text.slice(0, 157)}…` : text;
+      label.textContent = text;
+      label.title = text;
       button.append(label);
     });
     updateContext();

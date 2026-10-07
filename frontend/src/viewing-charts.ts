@@ -21,7 +21,7 @@ import {
 
 // Most-viewed moments are listed at least this far apart.
 const MOMENT_BUFFER_SECONDS = 120;
-const MOMENTS_SHOWN = 8;
+const MOMENTS_SHOWN = 4;
 const INSIGHTS_SHOWN = 5;
 const count = (value: number) => value.toLocaleString();
 const pct = (share: number) => `${Math.round(share * 100)}%`;
