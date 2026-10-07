@@ -94,6 +94,13 @@ Open owner decisions: UT wordmarks and real lecture frames in the public source,
 author email, and the UT GitHub Enterprise links in docs. In `../apiTest` (not modified):
 `screenshot.png` shows real instructor names and view counts on the public remote.
 
+## Proposal: Canvas LTI tool
+
+`docs/lti-design.md` is a draft design for running the dashboard as an LTI 1.3 tool in Canvas
+(hosted, multi-user, scoped by an explicit course-to-folder mapping). It is a proposal only;
+nothing is implemented. Its open questions (course mapping, hosting, approval path) need answers
+before any code.
+
 ## Run
 
 `npm ci`, then `npm run dev`; open http://localhost:3100.
